@@ -16,7 +16,7 @@ from PySide2.QtCore import (
 from PySide2.QtGui import (
     QFont, QPainter, QPen, QColor, QTextCursor,
     QTextCharFormat, QPalette, QIntValidator,
-    QTextDocument, QImage, QCursor
+    QTextDocument, QImage
 )
 
 # ===== 配置 =====
@@ -470,7 +470,6 @@ class q19(QTextEdit):
 
         q20._last_needle = ""
 
-        # ✅ hover bar：固定左下角 + 稳定显示（防闪）
         q20._img_bar = QWidget(q20.viewport())
         q20._img_bar.setObjectName("img_bar")
         q20._img_bar.setMouseTracking(True)
@@ -495,12 +494,6 @@ class q19(QTextEdit):
         q20._img_bar.adjustSize()
         q20._img_bar.hide()
 
-        # ✅ hover bar 防闪：离开图片后延迟隐藏（光标快速来回不闪）
-        q20._img_hide_delay_ms = 120
-        q20._img_hide_timer = QTimer(q20)
-        q20._img_hide_timer.setSingleShot(True)
-        q20._img_hide_timer.timeout.connect(q20._maybe_hide_img_bar)
-
         q20.q89 = q81(q20)
 
         q20.document().blockCountChanged.connect(q20.q90)
@@ -516,7 +509,7 @@ class q19(QTextEdit):
         q20.setPlainText("\n" * _START_EMPTY_LINES)
         q20.q90(0)
 
-    # ====== 只允许“光标点击”触发匹配高亮：编辑时清空 ======
+    # ====== 只允许“鼠标点击”触发匹配高亮：编辑时清空 ======
 
     def _clear_match_highlight(q20):
         if q20._last_needle:
@@ -1017,6 +1010,7 @@ class q19(QTextEdit):
 
                     q20.setTextCursor(tc)
 
+                    # 小于阈值的“插入一张图”本来就是 1 unit，这里不分组也行；为了替换选区也一致，统一用 group
                     q20._push_undo_group(acts_group)
                     q20._schedule_debounced_refresh()
                     e.accept()
@@ -1051,18 +1045,6 @@ class q19(QTextEdit):
             md = q20._snapshot_clipboard_mimedata()
             q20.insertFromMimeData(md)
             e.accept()
-            return
-
-        # ✅ 修复：Ctrl+A 全选（不再插入 \x01）
-        if (e.modifiers() & Qt.ControlModifier) and e.key() == Qt.Key_A:
-            q20.selectAll()
-            e.accept()
-            return
-
-        # ✅ 关键修复：凡是带 Ctrl/Alt/Meta 的组合键（除上面自定义的），交给 Qt 默认处理
-        # 否则 e.text() 可能是控制字符（例如 \x01），被当作“普通输入”插进文档
-        if (e.modifiers() & (Qt.ControlModifier | Qt.AltModifier | Qt.MetaModifier)):
-            super().keyPressEvent(e)
             return
 
         tc = q20.textCursor()
@@ -1395,7 +1377,7 @@ class q19(QTextEdit):
             q20._schedule_debounced_refresh()
             return
 
-    # ====== 光标点击：只在点击时触发 q96（匹配高亮） ======
+    # ====== 鼠标点击：只在点击时触发 q96（匹配高亮） ======
 
     def mousePressEvent(q20, e):
         if e.button() == Qt.RightButton:
@@ -1433,13 +1415,9 @@ class q19(QTextEdit):
         q20.q96()
         q20._mouse_trigger = False
 
-    # ====== 图片 hover bar（固定左下角 + 稳定） ======
+    # ====== 图片 hover bar（原逻辑） ======
 
     def leaveEvent(q20, e):
-        try:
-            q20._img_hide_timer.stop()
-        except Exception:
-            pass
         q20._img_bar.hide()
         q20._hover_img_name = ""
         q20._hover_img_pos = -1
@@ -1468,50 +1446,57 @@ class q19(QTextEdit):
 
         return "", -1
 
-    def _maybe_hide_img_bar(q20):
-        # 超稳：如果光标还在 bar 上或图片上，就不隐藏
-        try:
-            pos = q20.viewport().mapFromGlobal(QCursor.pos())
-        except Exception:
-            pos = QPoint(-9999, -9999)
+    def _image_rect_from_pos(q20, img_pos: int, img_size: QSize) -> QRect:
+        doc = q20.document()
+        if img_pos < 0 or img_pos >= doc.characterCount():
+            return QRect()
 
-        try:
-            if q20._img_bar.isVisible() and q20._img_bar.geometry().contains(pos):
-                return
-        except Exception:
-            pass
+        c1 = QTextCursor(doc)
+        c1.setPosition(img_pos)
+        r1 = q20.cursorRect(c1)
 
-        try:
-            c = q20.cursorForPosition(pos)
-            name, p = q20._image_at_cursor(c)
-            if name:
-                # 仍在图片上：继续显示
-                q20._hover_img_name = name
-                q20._hover_img_pos = p
-                q20._update_img_bar_pos()
-                return
-        except Exception:
-            pass
+        c2 = QTextCursor(doc)
+        c2.setPosition(min(img_pos + 1, doc.characterCount() - 1))
+        r2 = q20.cursorRect(c2)
 
-        q20._img_bar.hide()
-        q20._hover_img_name = ""
-        q20._hover_img_pos = -1
-        q20._hover_img_size = QSize(0, 0)
+        left = min(r1.left(), r2.left())
+        right = max(r1.left(), r2.left())
+
+        iw = img_size.width()
+        ih = img_size.height()
+
+        w = right - left
+        if w < 2 and iw > 0:
+            w = iw
+
+        top = min(r1.top(), r2.top())
+        if ih > 0 and r1.height() < ih:
+            bottom = max(r1.bottom(), r2.bottom())
+            top = bottom - ih + 1
+
+        if iw > 0 and w < iw:
+            w = iw
+
+        if ih <= 0:
+            ih = max(r1.height(), r2.height(), 1)
+
+        return QRect(left, top, w, ih)
 
     def mouseMoveEvent(q20, e):
         super().mouseMoveEvent(e)
 
-        # 光标在 bar 上：保持显示（不做 hover 判定，避免闪）
         if q20._img_bar.isVisible() and q20._img_bar.geometry().contains(e.pos()):
-            try:
-                q20._img_hide_timer.stop()
-            except Exception:
-                pass
-            q20._update_img_bar_pos()
             return
 
         c = q20.cursorForPosition(e.pos())
         name, pos = q20._image_at_cursor(c)
+
+        if (not name) and q20._hover_img_name and q20._hover_img_pos >= 0:
+            img_rect = q20._image_rect_from_pos(
+                q20._hover_img_pos, q20._hover_img_size)
+            if (not img_rect.isNull()) and img_rect.adjusted(-3, -3, 3, 3).contains(e.pos()):
+                q20._update_img_bar_pos()
+                return
 
         if name and pos >= 0:
             q20._hover_img_name = name
@@ -1523,20 +1508,26 @@ class q19(QTextEdit):
             else:
                 q20._hover_img_size = QSize(0, 0)
 
-            try:
-                q20._img_hide_timer.stop()
-            except Exception:
-                pass
             q20._update_img_bar_pos()
-            return
-
-        # 不在图片上：延迟隐藏（防止快速抖动导致忽隐忽现）
-        if q20._hover_img_name:
-            q20._img_hide_timer.start(q20._img_hide_delay_ms)
+        else:
+            q20._img_bar.hide()
+            q20._hover_img_name = ""
+            q20._hover_img_pos = -1
+            q20._hover_img_size = QSize(0, 0)
 
     def _update_img_bar_pos(q20):
-        # ✅ 要求：按钮只允许固定左下角，位置永远不动（相对 viewport）
         if not q20._hover_img_name or q20._hover_img_pos < 0:
+            q20._img_bar.hide()
+            return
+
+        img_rect = q20._image_rect_from_pos(
+            q20._hover_img_pos, q20._hover_img_size)
+        if img_rect.isNull() or img_rect.width() <= 0 or img_rect.height() <= 0:
+            q20._img_bar.hide()
+            return
+
+        vp = q20.viewport().rect()
+        if not vp.intersects(img_rect.adjusted(-2, -2, 2, 2)):
             q20._img_bar.hide()
             return
 
@@ -1544,26 +1535,14 @@ class q19(QTextEdit):
         bar_h = q20._img_bar.height()
         bar_w = q20._img_bar.width()
 
-        vp = q20.viewport().rect()
-        if vp.width() <= 0 or vp.height() <= 0:
-            q20._img_bar.hide()
-            return
+        x = img_rect.left() + 2
+        y = img_rect.bottom() - bar_h - 2
 
-        margin = 8
-        x = margin
-        y = vp.height() - bar_h - margin
-
-        # clamp
         x = max(0, min(x, max(0, vp.width() - bar_w)))
         y = max(0, min(y, max(0, vp.height() - bar_h)))
 
         q20._img_bar.move(x, y)
-        if not q20._img_bar.isVisible():
-            q20._img_bar.show()
-        try:
-            q20._img_bar.raise_()
-        except Exception:
-            pass
+        q20._img_bar.show()
 
     def _save_hover_image(q20):
         from PySide2.QtWidgets import QFileDialog
@@ -1628,8 +1607,6 @@ class q19(QTextEdit):
         q20._btn_kope.setText("ok")
         QTimer.singleShot(260, lambda: q20._btn_kope.setText(old))
 
-        q20._update_img_bar_pos()
-
     # ====== zen 模式 ======
 
     def set_zen(q20, on: bool):
@@ -1648,7 +1625,7 @@ class q19(QTextEdit):
         QTimer.singleShot(0, q20._update_img_bar_pos)
         QTimer.singleShot(0, q20._update_scroll_marks)
 
-    # ====== 匹配高亮（只允许光标触发 q96） ======
+    # ====== 匹配高亮（只允许鼠标触发 q96） ======
 
     def _needle(q20):
         tc = q20.textCursor()
@@ -1820,18 +1797,6 @@ class q64(QWidget):
 
     def _late_init_after_show(q65):
         q65._swap_in_real_editor()
-
-        # ✅ 修复：Zen 模式不显示右下角倒三角拉杆
-        try:
-            if not q65._zen:
-                q65.q80.show()
-                q65.q80.raise_()
-                q65.q80.move(q65.width() - 28, q65.height() - 28)
-            else:
-                q65.q80.hide()
-        except Exception:
-            pass
-
         QTimer.singleShot(0, q65._late_alloc_wq_id)
 
         if _s_get_bool("win_max", False):
@@ -2007,42 +1972,12 @@ class q64(QWidget):
     def set_zen(q65, on: bool):
         q65._zen = on
         q65.q73.setVisible(not on)
-
-        # ✅ 修复 1：zen 模式不要显示右下角拉杆
         q65.q80.setVisible(not on)
-        try:
-            if not on:
-                q65.q80.show()
-                q65.q80.raise_()
-            else:
-                q65.q80.hide()
-        except Exception:
-            pass
-
         if hasattr(q65, "q79") and hasattr(q65.q79, "set_zen"):
             q65.q79.set_zen(on)
 
-    # ✅ 点击顶栏一次，更新“编辑窗口文本总字节数（b）”
-    def _update_logo_bytes(q65):
-        try:
-            wid = q65._wq_id if q65._wq_id else "?"
-            txt = ""
-            if hasattr(q65, "q79") and hasattr(q65.q79, "toPlainText"):
-                txt = q65.q79.toPlainText() or ""
-            n = len(txt.encode("utf-8"))
-            q65.q_logo.setText(f"{_WQ_PREFIX}{wid} : {n:,}")
-        except Exception:
-            pass
-
     def eventFilter(q65, obj, event):
         if event.type() == QEvent.MouseButtonPress:
-            try:
-                if (not q65._zen) and event.button() == Qt.LeftButton:
-                    if obj in (q65.q73, q65.q_logo, q65.q_font_box, q65.q75, q65.q76, q65.q77):
-                        q65._update_logo_bytes()
-            except Exception:
-                pass
-
             try:
                 if event.button() == Qt.RightButton:
                     q65.toggle_zen()
@@ -2065,19 +2000,7 @@ class q64(QWidget):
         q65._sync_max_button()
 
     def resizeEvent(q65, e):
-        # ✅ 拉杆仅非 zen 才显示 + 跟随位置
-        if not q65._zen:
-            q65.q80.move(q65.width() - 28, q65.height() - 28)
-            try:
-                q65.q80.show()
-                q65.q80.raise_()
-            except Exception:
-                pass
-        else:
-            try:
-                q65.q80.hide()
-            except Exception:
-                pass
+        q65.q80.move(q65.width() - 28, q65.height() - 28)
 
     def mousePressEvent(q65, e):
         if e.button() == Qt.LeftButton and e.pos().y() < 32 and not q65.isMaximized() and not q65._zen:
