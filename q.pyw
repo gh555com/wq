@@ -4,6 +4,8 @@ import signal
 import time
 import re
 import tempfile
+import shutil
+from datetime import datetime
 from pynput import keyboard
 
 # 错误日志记录
@@ -117,9 +119,69 @@ IMG_HOVER_BORDER = QColor("#FF6600")
 _WQ_PREFIX = "wq"
 _WQ_DIRNAME = "wq_ggea_instances"
 
-# 窗口分组顺序：q w a s 1 2
-_WINDOW_GROUPS = ['q', 'w', 'a', 's', '1', '2']
+# 窗口分组顺序：a s q w 1 2
+_WINDOW_GROUPS = ['a', 's', 'q', 'w', '1', '2']
 _MAX_WINDOWS = 6
+
+# Queue文件夹配置
+_QUEUE_FOLDER = os.path.join(os.path.dirname(__file__), "queue")
+_QUEUE_MAX_SIZE = 20 * 1024 * 1024  # 20MB
+_QUEUE_DEBOUNCE_TIME = 1000  # 1秒防抖
+
+# 确保queue文件夹存在
+def _ensure_queue_folder():
+    try:
+        if not os.path.exists(_QUEUE_FOLDER):
+            os.makedirs(_QUEUE_FOLDER)
+    except Exception as e:
+        log_error(f"Error creating queue folder: {e}")
+
+# 生成时间格式文件名
+def _generate_queue_filename():
+    try:
+        now = datetime.now()
+        # 获取星期几（1-7，1是星期一，7是星期日）
+        weekday = now.isoweekday()
+        # 格式化为：2026.01.28__3__15.33.45.wq
+        filename = now.strftime(f"%Y.%m.%d__{weekday}__%H.%M.%S.wq")
+        return filename
+    except Exception as e:
+        log_error(f"Error generating queue filename: {e}")
+        # 出错时返回一个带时间戳的文件名
+        return f"error_{int(time.time())}.wq"
+
+# 限制queue文件夹大小
+def _limit_queue_size():
+    try:
+        if not os.path.exists(_QUEUE_FOLDER):
+            return
+
+        # 计算当前文件夹大小
+        total_size = 0
+        files = []
+
+        for root, dirs, filenames in os.walk(_QUEUE_FOLDER):
+            for filename in filenames:
+                file_path = os.path.join(root, filename)
+                if os.path.isfile(file_path):
+                    file_size = os.path.getsize(file_path)
+                    total_size += file_size
+                    files.append((file_path, file_size, os.path.getmtime(file_path)))
+
+        # 如果超过限制，删除最旧的文件
+        while total_size > _QUEUE_MAX_SIZE and files:
+            # 按修改时间排序，最旧的在前
+            files.sort(key=lambda x: x[2])
+            oldest_file = files.pop(0)
+            oldest_path, oldest_size, _ = oldest_file
+
+            try:
+                os.remove(oldest_path)
+                total_size -= oldest_size
+            except Exception as e:
+                log_error(f"Error removing old queue file: {e}")
+    except Exception as e:
+        log_error(f"Error limiting queue size: {e}")
 
 def _wq_dir() -> str:
     import tempfile
@@ -1265,6 +1327,22 @@ class q19(QPlainTextEdit):
                 p.setBrush(red)
                 p.drawEllipse(QRectF(cx - radius, cy - radius, dot_d, dot_d))
 
+                # 在红色圆形中显示当前窗口编号字符
+                window_id = ""
+                if hasattr(q20, 'window'):
+                    window = q20.window()
+                    if hasattr(window, '_wq_id'):
+                        window_id = window._wq_id
+
+                if window_id:
+                    # 设置字体和颜色（字号加大1px，不要加粗）
+                    font = QFont("Tahoma", 9)
+                    p.setFont(font)
+                    p.setPen(QColor("#ffffff"))
+                    # 在圆形中央绘制字符（往上移1px，往右移1px）
+                    text_rect = QRectF(cx - radius + 1, cy - radius - 1, dot_d, dot_d)
+                    p.drawText(text_rect, Qt.AlignCenter, window_id)
+
         p.end()
 
     def mouseMoveEvent(q20, e):
@@ -1383,14 +1461,17 @@ class q19(QPlainTextEdit):
         if (mods & Qt.ControlModifier) and e.key() == Qt.Key_C:
             tc = q20.textCursor()
             if not tc.hasSelection():
-                tmp = QTextCursor(tc)
-                tmp.select(QTextCursor.LineUnderCursor)
-                t = tmp.selectedText().replace("\u2029", "\n")
-                if not t.endswith("\n"):
-                    t += "\n"
-                QApplication.clipboard().setText(t)
-                e.accept()
-                return
+                # 复制整行，不被空格阻断
+                block = tc.block()
+                if block.isValid():
+                    # 获取整个块的文本，包括所有空格
+                    t = block.text().replace("\u2029", "\n")
+                    # 确保以换行符结尾
+                    if not t.endswith("\n"):
+                        t += "\n"
+                    QApplication.clipboard().setText(t)
+                    e.accept()
+                    return
             else:
                 t = tc.selectedText().replace("\u2029", "\n")
                 QApplication.clipboard().setText(t)
@@ -1739,10 +1820,74 @@ class q64(QWidget):
         q65.setFocusPolicy(Qt.StrongFocus)
         q65.q79.setFocusPolicy(Qt.StrongFocus)
 
+        # 初始化队列保存
+        q65._init_queue_save()
+        # 连接文本变化信号到防抖保存
+        q65.q79.textChanged.connect(lambda: q65._schedule_queue_save())
+
         QTimer.singleShot(0, q65.apply_font_size)
         q65.set_zen(q65._zen)
+        # 设置光标位置到第33行
+        QTimer.singleShot(0, lambda: q65._set_cursor_to_line(33))
         QTimer.singleShot(0, q65.q79.setFocus)
         QTimer.singleShot(0, q65._pos_resize_grip)
+
+    def _set_cursor_to_line(q65, line_num):
+        try:
+            if hasattr(q65, 'q79'):
+                editor = q65.q79
+                # 确保文档有足够的行数
+                current_lines = editor.document().blockCount()
+                if current_lines < line_num:
+                    # 添加足够的空行
+                    editor.setPlainText(editor.toPlainText() + '\n' * (line_num - current_lines))
+                # 设置光标位置到指定行
+                cursor = editor.textCursor()
+                cursor.movePosition(cursor.Start)
+                for _ in range(line_num - 1):
+                    cursor.movePosition(cursor.Down)
+                editor.setTextCursor(cursor)
+                # 滚动到光标位置
+                editor.ensureCursorVisible()
+        except Exception as e:
+            log_error(f"Error setting cursor to line {line_num}: {e}")
+
+    def _init_queue_save(q65):
+        # 初始化队列保存相关属性
+        q65._queue_save_timer = QTimer(q65)
+        q65._queue_save_timer.setSingleShot(True)
+        q65._queue_save_timer.timeout.connect(lambda: q65._save_to_queue())
+
+    def _save_to_queue(q65):
+        try:
+            # 确保queue文件夹存在
+            _ensure_queue_folder()
+
+            # 获取当前编辑器内容
+            if not hasattr(q65, 'q79'):
+                return
+
+            content = q65.q79.toPlainText()
+            if not content:
+                return
+
+            # 生成文件名
+            filename = _generate_queue_filename()
+            file_path = os.path.join(_QUEUE_FOLDER, filename)
+
+            # 写入文件
+            with open(file_path, 'w', encoding='utf-8') as f:
+                f.write(content)
+
+            # 检查并限制queue文件夹大小
+            _limit_queue_size()
+        except Exception as e:
+            log_error(f"Error saving to queue: {e}")
+
+    def _schedule_queue_save(q65):
+        # 防抖保存，用户停止输入1秒后保存
+        if hasattr(q65, '_queue_save_timer'):
+            q65._queue_save_timer.start(_QUEUE_DEBOUNCE_TIME)
 
     def _late_alloc_wq_id(q65):
         try:
@@ -2038,7 +2183,13 @@ class q64(QWidget):
             x = (rect.width() - hint_rect.width()) // 2
             y = rect.height() - hint_rect.height() - 30
 
+            # 确保提示在窗口内
+            x = max(10, min(x, rect.width() - hint_rect.width() - 10))
+            y = max(10, min(y, rect.height() - hint_rect.height() - 10))
+
             q65._hint_label.move(x, y)
+            # 确保提示在最前面
+            q65._hint_label.raise_()
             q65._hint_label.show()
 
             # 3秒后隐藏
