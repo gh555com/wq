@@ -353,9 +353,12 @@ class qSB(QScrollBar):
                 y2 = y1 + 2
             y1 = max(0, y1)
             y2 = min(h, y2)
-            # 所有类型的标注都显示在左边
-            x = 0
-            ww = w
+            if kind == "find":
+                x = 1 if w >= 3 else 0
+                ww = max(1, w - 2) if w >= 3 else w
+            else:
+                x = 0
+                ww = w
             p.drawRect(x, y1, ww, max(1, y2 - y1))
         p.end()
 
@@ -940,6 +943,8 @@ class q19(QPlainTextEdit):
             if t and not t.isspace():
                 return t
         tmp = QTextCursor(tc)
+        # 先向左移动一个字符，然后选择单词，这样就能匹配左边的内容
+        tmp.movePosition(QTextCursor.Left, QTextCursor.MoveAnchor)
         tmp.select(QTextCursor.WordUnderCursor)
         t = tmp.selectedText().strip()
         if t and not t.isspace():
