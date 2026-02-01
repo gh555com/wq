@@ -4,6 +4,26 @@ import signal
 import time
 import re
 import tempfile
+from pynput import keyboard
+
+# 错误日志记录
+def log_error(error):
+    log_path = os.path.join(os.path.dirname(__file__), "q.log")
+    try:
+        with open(log_path, "a", encoding="utf-8") as f:
+            timestamp = time.strftime("%Y-%m-%d %H:%M:%S")
+            f.write(f"[{timestamp}] {error}\n")
+    except Exception:
+        pass
+
+# 重定向标准错误
+def custom_excepthook(exc_type, exc_value, exc_traceback):
+    error_msg = f"{exc_type.__name__}: {exc_value}"
+    log_error(error_msg)
+    # 调用原始的 excepthook
+    sys.__excepthook__(exc_type, exc_value, exc_traceback)
+
+sys.excepthook = custom_excepthook
 
 from PySide2.QtWidgets import (
     QApplication, QWidget, QVBoxLayout, QHBoxLayout,
@@ -1589,9 +1609,7 @@ class q64(QWidget):
         q65._logo_docsize_txt = ""
 
         # 快捷键相关
-        q65._is_activated = False  # table 或 f2 是否激活
-        q65._activation_time = 0  # 激活时间戳
-        q65._ACTIVATION_DURATION = 1000  # 激活持续时间（毫秒）
+        q65._is_modifier_pressed = False  # table 或 f2 是否被按下
         q65._modifier_release_times = []  # table 或 f2 释放的时间戳
         q65._MODIFIER_DELAY = 600  # 600ms 内三次按键关闭窗口
 
@@ -1724,66 +1742,73 @@ class q64(QWidget):
             if q65._wq_id is None:
                 QTimer.singleShot(0, q65.close)
                 return
-        except Exception:
+        except Exception as e:
+            log_error(f"Error allocating window ID: {e}")
             q65._wq_id, q65._wq_lock = 'q', None
-        q65._sync_logo()
 
-        # 背景色与分组一一对应
-        bg_color_map = {
-            'q': q1,      # 默认颜色
-            'w': q1_wq2,  # 偏暖的米黄色
-            'a': q1_wq3,  # 偏棕的米黄色
-            's': q1_wq4,  # 偏橙的米黄色
-            '1': q1_wq5,  # 偏红的米黄色
-            '2': q1_wq6   # 偏绿的米黄色
-        }
-        bg_color = bg_color_map.get(q65._wq_id, q1)
+        try:
+            q65._sync_logo()
 
-        # 设置窗口背景色和顶部按钮行背景色
-        q65.setStyleSheet(f"background:{bg_color}; border:none;")
-        # 更新顶部按钮行背景色
-        if hasattr(q65, 'q73'):
-            q65.q73.setStyleSheet(f"background:{bg_color}; border:none;")
+            # 背景色与分组一一对应
+            bg_color_map = {
+                'q': q1,      # 默认颜色
+                'w': q1_wq2,  # 偏暖的米黄色
+                'a': q1_wq3,  # 偏棕的米黄色
+                's': q1_wq4,  # 偏橙的米黄色
+                '1': q1_wq5,  # 偏红的米黄色
+                '2': q1_wq6   # 偏绿的米黄色
+            }
+            bg_color = bg_color_map.get(q65._wq_id, q1)
 
-        # 同时更新编辑器的背景色
-        if hasattr(q65, 'q79'):
-            editor_style = f'''
-            QPlainTextEdit {{
-                background:{bg_color};
-                color:{q2};
-                border:none;
-                selection-background-color: rgb(233,211,2);
-                selection-color: {q2};
-            }}
-            QScrollBar:vertical {{
-                background: transparent;
-                width: 6px;
-                margin: 0px;
-            }}
-            QScrollBar::handle:vertical {{
-                background: {q5};
-                min-height: 40px;
-                border-radius: 0px;
-            }}
-            QScrollBar::add-line:vertical,
-            QScrollBar::sub-line:vertical {{
-                height: 0px;
-            }}
-            QScrollBar::add-page:vertical,
-            QScrollBar::sub-page:vertical {{
-                background: none;
-            }}
-            '''
-            q65.q79.setStyleSheet(editor_style)
-            # 更新行号区域背景色
-            if hasattr(q65.q79, 'q89'):
-                q65.q79.q89.setStyleSheet(f"background:{bg_color};")
+            # 设置窗口背景色和顶部按钮行背景色
+            q65.setStyleSheet(f"background:{bg_color}; border:none;")
+            # 更新顶部按钮行背景色
+            if hasattr(q65, 'q73'):
+                q65.q73.setStyleSheet(f"background:{bg_color}; border:none;")
 
-        # 确保窗口和编辑器能够接收键盘事件
-        q65.setFocusPolicy(Qt.StrongFocus)
-        if hasattr(q65, 'q79'):
-            q65.q79.setFocusPolicy(Qt.StrongFocus)
-        q65.setFocus()
+            # 同时更新编辑器的背景色
+            if hasattr(q65, 'q79'):
+                editor_style = f'''
+                QPlainTextEdit {{
+                    background:{bg_color};
+                    color:{q2};
+                    border:none;
+                    selection-background-color: rgb(233,211,2);
+                    selection-color: {q2};
+                }}
+                QScrollBar:vertical {{
+                    background: transparent;
+                    width: 6px;
+                    margin: 0px;
+                }}
+                QScrollBar::handle:vertical {{
+                    background: {q5};
+                    min-height: 40px;
+                    border-radius: 0px;
+                }}
+                QScrollBar::add-line:vertical,
+                QScrollBar::sub-line:vertical {{
+                    height: 0px;
+                }}
+                QScrollBar::add-page:vertical,
+                QScrollBar::sub-page:vertical {{
+                    background: none;
+                }}
+                '''
+                q65.q79.setStyleSheet(editor_style)
+                # 更新行号区域背景色
+                if hasattr(q65.q79, 'q89'):
+                    q65.q79.q89.setStyleSheet(f"background:{bg_color};")
+        except Exception as e:
+            log_error(f"Error setting window styles: {e}")
+
+        try:
+            # 确保窗口和编辑器能够接收键盘事件
+            q65.setFocusPolicy(Qt.StrongFocus)
+            if hasattr(q65, 'q79'):
+                q65.q79.setFocusPolicy(Qt.StrongFocus)
+        except Exception as e:
+            log_error(f"Error setting focus policy: {e}")
 
     def _restore_maximized(q65):
         try:
@@ -1961,41 +1986,7 @@ class q64(QWidget):
     def keyPressEvent(q65, event):
         key = event.key()
 
-        # 处理 table 或 f2 键的按下
-        if key == Qt.Key_Tab or key == Qt.Key_F2:
-            # 激活快捷键模式
-            q65._is_activated = True
-            q65._activation_time = time.time() * 1000  # 转换为毫秒
-            event.accept()
-            return
-
-        # 当激活状态时，处理 12qwas 按键
-        current_time = time.time() * 1000
-        if q65._is_activated and (current_time - q65._activation_time) < q65._ACTIVATION_DURATION:
-            key_char = event.text().lower()
-            if key_char in _WINDOW_GROUPS:
-                # 遍历全局窗口列表，找到对应分组的窗口
-                global _windows
-                for window in _windows:
-                    if hasattr(window, "_wq_id") and window._wq_id == key_char:
-                        if window.isMinimized():
-                            window.showNormal()
-                            # 显示悬浮提示
-                            window._show_hint(key_char)
-                        else:
-                            window.showMinimized()
-                        break
-                # 响应一次后取消激活状态
-                q65._is_activated = False
-                event.accept()
-                return
-
-        event.ignore()
-
-    def keyReleaseEvent(q65, event):
-        key = event.key()
-
-        # 处理 table 或 f2 键的释放
+        # 处理 table 或 f2 键的释放时间记录，用于检测三次按键
         if key == Qt.Key_Tab or key == Qt.Key_F2:
             # 记录释放时间，用于检测三次按键
             current_time = time.time() * 1000  # 转换为毫秒
@@ -2013,22 +2004,29 @@ class q64(QWidget):
 
         event.ignore()
 
+    def keyReleaseEvent(q65, event):
+        key = event.key()
+        event.ignore()
+
     def _show_hint(q65, text):
-        # 显示悬浮提示
-        q65._hint_label.setText(text)
-        q65._hint_label.adjustSize()
+        try:
+            # 显示悬浮提示
+            q65._hint_label.setText(text)
+            q65._hint_label.adjustSize()
 
-        # 定位到窗口底部中央
-        rect = q65.rect()
-        hint_rect = q65._hint_label.rect()
-        x = (rect.width() - hint_rect.width()) // 2
-        y = rect.height() - hint_rect.height() - 30
+            # 定位到窗口底部中央
+            rect = q65.rect()
+            hint_rect = q65._hint_label.rect()
+            x = (rect.width() - hint_rect.width()) // 2
+            y = rect.height() - hint_rect.height() - 30
 
-        q65._hint_label.move(x, y)
-        q65._hint_label.show()
+            q65._hint_label.move(x, y)
+            q65._hint_label.show()
 
-        # 3秒后隐藏
-        QTimer.singleShot(3000, q65._hint_label.hide)
+            # 3秒后隐藏
+            QTimer.singleShot(3000, q65._hint_label.hide)
+        except Exception as e:
+            log_error(f"Error showing hint: {e}")
 
     def changeEvent(q65, e):
         super().changeEvent(e)
@@ -2050,6 +2048,24 @@ class q64(QWidget):
             q65.q70 = False
         q65._sync_max_button()
         QTimer.singleShot(0, q65._pos_resize_grip)
+
+    def event(q65, e):
+        # 处理自定义的 ToggleWindowEvent 事件
+        if e.type() == QEvent.User + 1:
+            try:
+                # 强制还原或最小化窗口，不受窗口状态影响
+                if q65.isMinimized():
+                    # 还原窗口（简化处理，避免卡死）
+                    q65.showNormal()
+                    # 显示悬浮提示
+                    q65._show_hint(e.key_char)
+                else:
+                    # 最小化窗口
+                    q65.showMinimized()
+            except Exception as e:
+                log_error(f"Error toggling window state: {e}")
+            return True
+        return super().event(e)
 
     def closeEvent(q65, e):
         try:
@@ -2082,58 +2098,66 @@ class q64(QWidget):
 # 全局窗口列表，用于存储所有窗口实例
 _windows = []
 
-# 全局激活状态管理
-_global_activated = False
-_global_activation_time = 0
-_GLOBAL_ACTIVATION_DURATION = 1000  # 激活持续时间（毫秒）
+# 全局快捷键状态管理
+_global_modifier_pressed = False
+_keyboard_listener = None
 
-class GlobalKeyFilter(QObject):
-    def __init__(self, parent=None):
-        super().__init__(parent)
+# 自定义事件类型，用于在主线程中执行窗口操作
+class ToggleWindowEvent(QEvent):
+    def __init__(self, key_char):
+        super().__init__(QEvent.Type(QEvent.User + 1))
+        self.key_char = key_char
 
-    def eventFilter(self, obj, event):
-        if event.type() == QEvent.KeyPress:
-            key = event.key()
+# 全局键盘监听器回调函数
+def on_key_press(key):
+    try:
+        # 处理 table 或 f2 键的按下
+        if key == keyboard.Key.tab or key == keyboard.Key.f2:
+            global _global_modifier_pressed
+            _global_modifier_pressed = True
+            return
 
-            # 处理 table 或 f2 键的按下
-            if key == Qt.Key_Tab or key == Qt.Key_F2:
-                # 激活全局快捷键模式
-                global _global_activated, _global_activation_time
-                _global_activated = True
-                _global_activation_time = time.time() * 1000  # 转换为毫秒
-                return True
-
-            # 当激活状态时，处理 12qwas 按键
-            current_time = time.time() * 1000
-            if _global_activated and (current_time - _global_activation_time) < _GLOBAL_ACTIVATION_DURATION:
-                key_char = event.text().lower()
+        # 当 table 或 f2 被按下时，处理 12qwas 按键
+        if _global_modifier_pressed:
+            if hasattr(key, 'char') and key.char:
+                key_char = key.char.lower()
                 if key_char in _WINDOW_GROUPS:
                     # 遍历全局窗口列表，找到对应分组的窗口
                     global _windows
                     for window in _windows:
                         if hasattr(window, "_wq_id") and window._wq_id == key_char:
-                            if window.isMinimized():
-                                window.showNormal()
-                                # 显示悬浮提示
-                                window._show_hint(key_char)
-                            else:
-                                window.showMinimized()
-                            break
-                    # 响应一次后取消激活状态
-                    _global_activated = False
-                    return True
+                            # 使用 QApplication.postEvent 在主线程中投递事件
+                            from PySide2.QtWidgets import QApplication
+                            event = ToggleWindowEvent(key_char)
+                            QApplication.postEvent(window, event)
+                            return
+    except Exception as e:
+        log_error(f"Error in on_key_press: {e}")
 
-        return super().eventFilter(obj, event)
+
+def on_key_release(key):
+    try:
+        # 处理 table 或 f2 键的释放
+        if key == keyboard.Key.tab or key == keyboard.Key.f2:
+            # 取消激活状态
+            global _global_modifier_pressed
+            _global_modifier_pressed = False
+    except Exception as e:
+        log_error(f"Error in on_key_release: {e}")
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
 
-    # 安装全局事件过滤器
-    global_filter = GlobalKeyFilter()
-    app.installEventFilter(global_filter)
+    # 启动全局键盘监听器
+    _keyboard_listener = keyboard.Listener(on_press=on_key_press, on_release=on_key_release)
+    _keyboard_listener.start()
 
     def _sigint_handler(*_):
         try:
+            # 停止键盘监听器
+            global _keyboard_listener
+            if _keyboard_listener:
+                _keyboard_listener.stop()
             app.quit()
         except Exception:
             pass
@@ -2148,4 +2172,11 @@ if __name__ == "__main__":
 
     win = q64()
     win.show()
-    sys.exit(app.exec_())
+
+    # 运行应用程序
+    try:
+        sys.exit(app.exec_())
+    finally:
+        # 确保键盘监听器被停止
+        if _keyboard_listener:
+            _keyboard_listener.stop()
