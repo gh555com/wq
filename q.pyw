@@ -7,7 +7,7 @@ import tempfile
 
 from PySide2.QtWidgets import (
     QApplication, QWidget, QVBoxLayout, QHBoxLayout,
-    QPushButton, QPlainTextEdit, QLineEdit, QLabel, QScrollBar,
+    QPushButton, QPlainTextEdit, QTextEdit, QLineEdit, QLabel, QScrollBar,
     QStyle, QStyleOptionSlider, QFileDialog
 )
 from PySide2.QtCore import (
@@ -353,12 +353,9 @@ class qSB(QScrollBar):
                 y2 = y1 + 2
             y1 = max(0, y1)
             y2 = min(h, y2)
-            if kind == "find":
-                x = 1 if w >= 3 else 0
-                ww = max(1, w - 2) if w >= 3 else w
-            else:
-                x = 0
-                ww = w
+            # 所有类型的标注都显示在左边
+            x = 0
+            ww = w
             p.drawRect(x, y1, ww, max(1, y2 - y1))
         p.end()
 
@@ -957,10 +954,10 @@ class q19(QPlainTextEdit):
             q20._update_scroll_marks()
             return
 
-        tc0 = q20.textCursor()
-        sel_start = tc0.selectionStart()
-        sel_end = tc0.selectionEnd()
-        has_sel = tc0.hasSelection()
+        tc = q20.textCursor()
+        sel_start = tc.selectionStart()
+        sel_end = tc.selectionEnd()
+        has_sel = tc.hasSelection()
 
         fmt = QTextCharFormat()
         fmt.setBackground(MATCH_BG)
@@ -988,7 +985,7 @@ class q19(QPlainTextEdit):
             c.setPosition(idx)
             c.setPosition(idx + L, QTextCursor.KeepAnchor)
 
-            es = QPlainTextEdit.ExtraSelection()
+            es = QTextEdit.ExtraSelection()
             es.cursor = c
             es.format = fmt
             extras.append(es)
@@ -1002,15 +999,10 @@ class q19(QPlainTextEdit):
         QTimer.singleShot(0, lambda: q20._apply_match_highlight(q20._needle()))
 
     def _update_scroll_marks(q20):
-        # ✅ 任务二：按参考代码思路，用 layout/documentSize + blockBoundingRect 做精确比例
         doc = q20.document()
         layout = doc.documentLayout()
-        try:
-            doc_h = float(layout.documentSize().height())
-        except Exception:
-            doc_h = 0.0
-
-        if doc_h <= 1.0:
+        doc_h = float(layout.documentSize().height())
+        if doc_h <= 1:
             q20.verticalScrollBar().set_markers([])
             return
 
@@ -1046,7 +1038,8 @@ class q19(QPlainTextEdit):
                         b = doc.findBlockByNumber(bn)
                         if not b.isValid():
                             continue
-                        br = layout.blockBoundingRect(b)  # QRectF
+                        # 对于 QPlainTextEdit，使用 blockBoundingGeometry 获取相对于文档的位置
+                        br = q20.blockBoundingGeometry(b)
                         a = max(0.0, float(br.top()) / doc_h)
                         bb = min(1.0, float(br.bottom()) / doc_h)
                         markers.append(("find", a, bb))
@@ -1058,8 +1051,8 @@ class q19(QPlainTextEdit):
             b1 = doc.findBlock(s)
             b2 = doc.findBlock(e - 1)
             if b1.isValid() and b2.isValid():
-                br1 = layout.blockBoundingRect(b1)
-                br2 = layout.blockBoundingRect(b2)
+                br1 = q20.blockBoundingGeometry(b1)
+                br2 = q20.blockBoundingGeometry(b2)
                 a = max(0.0, float(br1.top()) / doc_h)
                 bb = min(1.0, float(br2.bottom()) / doc_h)
                 markers.append(("sel", a, bb))
@@ -1372,8 +1365,7 @@ class q19(QPlainTextEdit):
         if not q20._pending_single:
             return
         q20._pending_single = False
-        if QApplication.mouseButtons() != Qt.NoButton:
-            return
+        # 移除鼠标按钮检查，直接调用 q96
         q20.q96()
         q20._mouse_trigger = False
 
