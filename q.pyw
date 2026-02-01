@@ -1703,20 +1703,7 @@ class q64(QWidget):
         q65._modifier_release_times = []  # table 或 f2 释放的时间戳
         q65._MODIFIER_DELAY = 600  # 600ms 内三次按键关闭窗口
 
-        # 悬浮提示
-        q65._hint_label = QLabel(q65)
-        q65._hint_label.setStyleSheet('''
-            QLabel {
-                background: rgba(214, 0, 0, 180);
-                color: white;
-                border-radius: 30px;
-                padding: 30px 60px;
-                font-size: 72px;
-                font-weight: bold;
-            }
-        ''')
-        q65._hint_label.setAlignment(Qt.AlignCenter)
-        q65._hint_label.hide()
+
 
         # 添加到全局窗口列表
         global _windows
@@ -2220,31 +2207,7 @@ class q64(QWidget):
         key = event.key()
         event.ignore()
 
-    def _show_hint(q65, text):
-        try:
-            # 显示悬浮提示
-            q65._hint_label.setText(text)
-            q65._hint_label.adjustSize()
 
-            # 定位到窗口底部中央
-            rect = q65.rect()
-            hint_rect = q65._hint_label.rect()
-            x = (rect.width() - hint_rect.width()) // 2
-            y = rect.height() - hint_rect.height() - 30
-
-            # 确保提示在窗口内
-            x = max(10, min(x, rect.width() - hint_rect.width() - 10))
-            y = max(10, min(y, rect.height() - hint_rect.height() - 10))
-
-            q65._hint_label.move(x, y)
-            # 确保提示在最前面
-            q65._hint_label.raise_()
-            q65._hint_label.show()
-
-            # 3秒后隐藏
-            QTimer.singleShot(3000, q65._hint_label.hide)
-        except Exception as e:
-            log_error(f"Error showing hint: {e}")
 
     def changeEvent(q65, e):
         super().changeEvent(e)
@@ -2275,8 +2238,6 @@ class q64(QWidget):
                 if q65.isMinimized():
                     # 还原窗口（简化处理，避免卡死）
                     q65.showNormal()
-                    # 显示悬浮提示
-                    q65._show_hint(e.key_char)
                 else:
                     # 最小化窗口
                     q65.showMinimized()
