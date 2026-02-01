@@ -1305,43 +1305,43 @@ class q19(QPlainTextEdit):
                 p.setBrush(Qt.NoBrush)
                 p.drawRect(img_rect.adjusted(0, 0, -1, -1))
 
-        if q20.hasFocus():
-            r = q20.cursorRect(q20.textCursor())
-            if vp.intersects(r.adjusted(-2, -10, 2, 2)):
-                cx = float(int(r.left()))
-                top = float(int(r.top()))
-                dot_d = 11.0
-                radius = dot_d * 0.5
-                cy = top - radius - 3.0
+        # 无论窗口是否有焦点，都显示红色棒棒糖
+        r = q20.cursorRect(q20.textCursor())
+        if vp.intersects(r.adjusted(-2, -10, 2, 2)):
+            cx = float(int(r.left()))
+            top = float(int(r.top()))
+            dot_d = 11.0
+            radius = dot_d * 0.5
+            cy = top - radius - 3.0
 
-                p.setRenderHint(QPainter.Antialiasing, False)
-                line_pen = QPen(QColor("#000000"))
-                line_pen.setWidth(1)
-                p.setPen(line_pen)
-                p.drawLine(QPointF(cx, top), QPointF(cx, cy + radius))
+            p.setRenderHint(QPainter.Antialiasing, False)
+            line_pen = QPen(QColor("#000000"))
+            line_pen.setWidth(1)
+            p.setPen(line_pen)
+            p.drawLine(QPointF(cx, top), QPointF(cx, cy + radius))
 
-                p.setRenderHint(QPainter.Antialiasing, True)
-                red = QColor("#d60000")
-                red.setAlphaF(0.4)
-                p.setPen(QPen(red))
-                p.setBrush(red)
-                p.drawEllipse(QRectF(cx - radius, cy - radius, dot_d, dot_d))
+            p.setRenderHint(QPainter.Antialiasing, True)
+            red = QColor("#d60000")
+            red.setAlphaF(0.4)
+            p.setPen(QPen(red))
+            p.setBrush(red)
+            p.drawEllipse(QRectF(cx - radius, cy - radius, dot_d, dot_d))
 
-                # 在红色圆形中显示当前窗口编号字符
-                window_id = ""
-                if hasattr(q20, 'window'):
-                    window = q20.window()
-                    if hasattr(window, '_wq_id'):
-                        window_id = window._wq_id
+            # 在红色圆形中显示当前窗口编号字符
+            window_id = ""
+            if hasattr(q20, 'window'):
+                window = q20.window()
+                if hasattr(window, '_wq_id'):
+                    window_id = window._wq_id
 
-                if window_id:
-                    # 设置字体和颜色（字号加大1px，不要加粗）
-                    font = QFont("Tahoma", 9)
-                    p.setFont(font)
-                    p.setPen(QColor("#ffffff"))
-                    # 在圆形中央绘制字符（往上移1px，往右移1px）
-                    text_rect = QRectF(cx - radius + 1, cy - radius - 1, dot_d, dot_d)
-                    p.drawText(text_rect, Qt.AlignCenter, window_id)
+            if window_id:
+                # 设置字体和颜色（字号减小1px，字体Tahoma）
+                font = QFont("Tahoma", 8)
+                p.setFont(font)
+                p.setPen(QColor("#ffffff"))
+                # 在圆形中央绘制字符（往左移1px，往上移1px）
+                text_rect = QRectF(cx - radius , cy - radius - 2, dot_d, dot_d)
+                p.drawText(text_rect, Qt.AlignCenter, window_id)
 
         p.end()
 
@@ -1780,6 +1780,8 @@ class q64(QWidget):
         if _s_get_bool("win_max", False):
             QTimer.singleShot(0, q65._restore_maximized)
         QTimer.singleShot(0, q65._pos_resize_grip)
+        # 将窗口置到最顶层
+        QTimer.singleShot(0, q65._bring_to_front)
 
     def _swap_in_real_editor(q65):
         old = q65.q79 if hasattr(q65, "q79") else None
@@ -1857,6 +1859,41 @@ class q64(QWidget):
         q65._queue_save_timer = QTimer(q65)
         q65._queue_save_timer.setSingleShot(True)
         q65._queue_save_timer.timeout.connect(lambda: q65._save_to_queue())
+        # 为窗口生成唯一标识符，用于queue文件名
+        q65._window_unique_id = f"window_{id(q65)}"
+        # 记录上次保存的内容，用于检查内容变化
+        q65._last_saved_content = ""
+        # 记录该窗口的queue文件路径
+        q65._queue_file_path = ""
+        # 记录文件夹大小检查计数器
+        q65._size_check_counter = 0
+
+    def _get_queue_filename(q65):
+        # 为窗口生成基于时间格式的queue文件名
+        now = datetime.now()
+        # 获取星期几（1-7，1是星期一，7是星期日）
+        weekday = now.isoweekday()
+        # 格式化为：2026.01.28__3__15.33.45.wq
+        time_str = now.strftime(f"%Y.%m.%d__{weekday}__%H.%M.%S")
+        return f"{time_str}.wq"
+
+    def _get_existing_queue_file(q65):
+        # 获取该窗口的现有queue文件
+        if os.path.exists(_QUEUE_FOLDER):
+            for filename in os.listdir(_QUEUE_FOLDER):
+                if filename.endswith('.wq'):
+                    # 检查文件内容中是否包含窗口唯一标识符
+                    file_path = os.path.join(_QUEUE_FOLDER, filename)
+                    try:
+                        with open(file_path, 'r', encoding='utf-8') as f:
+                            content = f.read()
+                            # 这里简化处理，实际应该在文件中存储窗口标识符
+                            # 或者通过其他方式关联文件和窗口
+                            # 暂时返回第一个找到的文件
+                            return file_path
+                    except Exception:
+                        pass
+        return ""
 
     def _save_to_queue(q65):
         try:
@@ -1868,21 +1905,56 @@ class q64(QWidget):
                 return
 
             content = q65.q79.toPlainText()
-            if not content:
+
+            # 检查内容是否全是空行和空格
+            if not content or content.strip() == '':
+                # 如果内容全是空行和空格，删除该窗口的queue文件
+                if q65._queue_file_path and os.path.exists(q65._queue_file_path):
+                    try:
+                        os.remove(q65._queue_file_path)
+                        q65._queue_file_path = ""
+                        q65._last_saved_content = ""
+                    except Exception as e:
+                        log_error(f"Error removing empty queue file: {e}")
                 return
 
-            # 生成文件名
-            filename = _generate_queue_filename()
-            file_path = os.path.join(_QUEUE_FOLDER, filename)
+            # 检查内容是否与上次保存的相同
+            if content == q65._last_saved_content:
+                return
 
-            # 写入文件
-            with open(file_path, 'w', encoding='utf-8') as f:
+            # 获取或生成queue文件路径
+            if not q65._queue_file_path:
+                # 检查是否已有该窗口的queue文件
+                existing_file = q65._get_existing_queue_file()
+                if existing_file:
+                    q65._queue_file_path = existing_file
+                else:
+                    # 生成新的时间格式文件名
+                    filename = q65._get_queue_filename()
+                    q65._queue_file_path = os.path.join(_QUEUE_FOLDER, filename)
+
+            # 写入文件（覆盖写）
+            with open(q65._queue_file_path, 'w', encoding='utf-8') as f:
                 f.write(content)
 
-            # 检查并限制queue文件夹大小
-            _limit_queue_size()
+            # 更新上次保存的内容
+            q65._last_saved_content = content
+
+            # 每5次保存检查一次文件夹大小
+            q65._size_check_counter += 1
+            if q65._size_check_counter >= 5:
+                _limit_queue_size()
+                q65._size_check_counter = 0
         except Exception as e:
             log_error(f"Error saving to queue: {e}")
+
+    def _bring_to_front(q65):
+        # 将窗口置到最顶层
+        try:
+            q65.raise_()
+            q65.activateWindow()
+        except Exception as e:
+            log_error(f"Error bringing window to front: {e}")
 
     def _schedule_queue_save(q65):
         # 防抖保存，用户停止输入1秒后保存
