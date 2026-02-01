@@ -1336,11 +1336,11 @@ class q19(QPlainTextEdit):
 
             if window_id:
                 # 设置字体和颜色（字号减小1px，字体Tahoma）
-                font = QFont("Tahoma", 8)
+                font = QFont("Tahoma", 8, QFont.Bold )
                 p.setFont(font)
                 p.setPen(QColor("#ffffff"))
-                # 在圆形中央绘制字符（往左移1px，往上移1px）
-                text_rect = QRectF(cx - radius , cy - radius - 2, dot_d, dot_d)
+                # 在圆形中央绘制字符
+                text_rect = QRectF(cx - radius + 1 , cy - radius - 2, dot_d, dot_d)
                 p.drawText(text_rect, Qt.AlignCenter, window_id)
 
         p.end()
@@ -1707,11 +1707,11 @@ class q64(QWidget):
         q65._hint_label = QLabel(q65)
         q65._hint_label.setStyleSheet('''
             QLabel {
-                background: rgba(0, 0, 0, 180);
+                background: rgba(214, 0, 0, 180);
                 color: white;
-                border-radius: 10px;
-                padding: 10px 20px;
-                font-size: 24px;
+                border-radius: 30px;
+                padding: 30px 60px;
+                font-size: 72px;
                 font-weight: bold;
             }
         ''')
@@ -1877,24 +1877,6 @@ class q64(QWidget):
         time_str = now.strftime(f"%Y.%m.%d__{weekday}__%H.%M.%S")
         return f"{time_str}.wq"
 
-    def _get_existing_queue_file(q65):
-        # 获取该窗口的现有queue文件
-        if os.path.exists(_QUEUE_FOLDER):
-            for filename in os.listdir(_QUEUE_FOLDER):
-                if filename.endswith('.wq'):
-                    # 检查文件内容中是否包含窗口唯一标识符
-                    file_path = os.path.join(_QUEUE_FOLDER, filename)
-                    try:
-                        with open(file_path, 'r', encoding='utf-8') as f:
-                            content = f.read()
-                            # 这里简化处理，实际应该在文件中存储窗口标识符
-                            # 或者通过其他方式关联文件和窗口
-                            # 暂时返回第一个找到的文件
-                            return file_path
-                    except Exception:
-                        pass
-        return ""
-
     def _save_to_queue(q65):
         try:
             # 确保queue文件夹存在
@@ -1922,16 +1904,11 @@ class q64(QWidget):
             if content == q65._last_saved_content:
                 return
 
-            # 获取或生成queue文件路径
+            # 生成或使用queue文件路径
             if not q65._queue_file_path:
-                # 检查是否已有该窗口的queue文件
-                existing_file = q65._get_existing_queue_file()
-                if existing_file:
-                    q65._queue_file_path = existing_file
-                else:
-                    # 生成新的时间格式文件名
-                    filename = q65._get_queue_filename()
-                    q65._queue_file_path = os.path.join(_QUEUE_FOLDER, filename)
+                # 生成新的时间格式文件名
+                filename = q65._get_queue_filename()
+                q65._queue_file_path = os.path.join(_QUEUE_FOLDER, filename)
 
             # 写入文件（覆盖写）
             with open(q65._queue_file_path, 'w', encoding='utf-8') as f:
