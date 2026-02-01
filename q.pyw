@@ -100,7 +100,7 @@ q1_wq3 = "#e8d9c1"
 # wq4: 偏橙的米黄色
 q1_wq4 = "#f2e8d8"
 # wq5: 偏红的米黄色
-q1_wq5 = "#e6d6c0"
+q1_wq5 = "#e8d0c0"
 # wq6: 偏绿的米黄色
 q1_wq6 = "#e8e2c6"
 
@@ -1541,26 +1541,35 @@ class q19(QPlainTextEdit):
         rect = event.rect()
         # 使用当前窗口的背景色
         bg_color = q1
-        # 尝试获取窗口的背景色
+        # 尝试获取窗口的背景色，优先使用窗口的 _wq_id 对应的背景色
         if hasattr(q20, 'window'):
             window = q20.window()
-            if hasattr(window, 'styleSheet'):
-                style = window.styleSheet()
-                if 'background:' in style:
-                    import re
-                    match = re.search(r'background:(.*?);', style)
-                    if match:
-                        bg_color = match.group(1).strip()
+            if hasattr(window, '_wq_id'):
+                # 背景色与分组一一对应
+                bg_color_map = {
+                    'q': q1,      # 默认颜色
+                    'w': q1_wq2,  # 偏暖的米黄色
+                    'a': q1_wq3,  # 偏棕的米黄色
+                    's': q1_wq4,  # 偏橙的米黄色
+                    '1': q1_wq5,  # 偏红的米黄色
+                    '2': q1_wq6   # 偏绿的米黄色
+                }
+                bg_color = bg_color_map.get(window._wq_id, q1)
         painter.fillRect(rect, QColor(bg_color))
 
-        # 使用9px字体
-        font = QFont("Consolas", 9)
+        # 当文本总行号大于 9999 时，左侧行号的字号由 9px 改为 7px
+        block_count = q20.blockCount()
+        font_size = 7 if block_count > 9999 else 9
+        font = QFont("Consolas", font_size)
         painter.setFont(font)
 
         block = q20.firstVisibleBlock()
         block_num = block.blockNumber()
         top = int(q20.blockBoundingGeometry(block).translated(q20.contentOffset()).top())
         bottom = top + int(q20.blockBoundingRect(block).height())
+
+        # 获取基于当前字体的字体度量
+        font_metrics = painter.fontMetrics()
 
         while block.isValid() and top <= rect.bottom():
             if block.isVisible() and bottom >= rect.top():
@@ -1570,7 +1579,7 @@ class q19(QPlainTextEdit):
                 painter.setPen(col)
                 # 右对齐绘制行号
                 painter.drawText(0, top, q20.q89.width() - 1,
-                               q20.fontMetrics().height(),
+                               font_metrics.height(),
                                Qt.AlignRight | Qt.AlignVCenter, num)
 
             block = block.next()
@@ -1748,6 +1757,15 @@ class q64(QWidget):
 
         try:
             q65._sync_logo()
+            # 更新背景色
+            q65._update_background_color()
+        except Exception as e:
+            log_error(f"Error in _late_alloc_wq_id: {e}")
+
+    def _update_background_color(q65):
+        try:
+            if not hasattr(q65, '_wq_id') or q65._wq_id is None:
+                return
 
             # 背景色与分组一一对应
             bg_color_map = {
