@@ -943,7 +943,7 @@ class q19(QPlainTextEdit):
             if t and not t.isspace():
                 return t
         tmp = QTextCursor(tc)
-        # 先向左移动一个字符，然后选择单词，这样就能匹配左边的内容
+        # 先向左移动一个字符，然后选择单词，这样就能匹配左边的内容 否则是选右边
         tmp.movePosition(QTextCursor.Left, QTextCursor.MoveAnchor)
         tmp.select(QTextCursor.WordUnderCursor)
         t = tmp.selectedText().strip()
