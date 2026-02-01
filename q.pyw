@@ -70,7 +70,20 @@ def _s_set(k: str, v):
     except Exception:
         pass
 
+# 背景色：wq1 到 wq6
+# wq1: 当前默认颜色
 q1 = "#ede4cf"
+# wq2: 偏暖的米黄色
+q1_wq2 = "#f0e6d2"
+# wq3: 偏棕的米黄色
+q1_wq3 = "#e8d9c1"
+# wq4: 偏橙的米黄色
+q1_wq4 = "#f2e8d8"
+# wq5: 偏红的米黄色
+q1_wq5 = "#e6d6c0"
+# wq6: 偏绿的米黄色
+q1_wq6 = "#e8e2c6"
+
 q2 = "#5a4630"
 q5 = "rgba(220, 50, 47, 128)"
 q83 = "rgba(0,0,0,20)"
@@ -345,21 +358,22 @@ class qSB(QScrollBar):
         c.setAlpha(255)
         p.setBrush(c)
         for kind, a, b in self._markers:
-            y1 = int(a * h)
-            y2 = int(b * h)
-            if y2 <= y1:
-                y2 = y1 + 2
-            if (y2 - y1) < 2:
-                y2 = y1 + 2
-            y1 = max(0, y1)
-            y2 = min(h, y2)
-            if kind == "find":
-                x = 1 if w >= 3 else 0
-                ww = max(1, w - 2) if w >= 3 else w
-            else:
-                x = 0
-                ww = w
-            p.drawRect(x, y1, ww, max(1, y2 - y1))
+                y1 = int(a * h)
+                y2 = int(b * h)
+                # 确保上下宽度最小为1px，提高精度
+                if y2 <= y1:
+                    y2 = y1 + 1
+                if (y2 - y1) < 1:
+                    y2 = y1 + 1
+                y1 = max(0, y1)
+                y2 = min(h, y2)
+                if kind == "find":
+                    x = 1 if w >= 3 else 0
+                    ww = max(1, w - 2) if w >= 3 else w
+                else:
+                    x = 0
+                    ww = w
+                p.drawRect(x, y1, ww, y2 - y1)
         p.end()
 
 
@@ -1021,8 +1035,10 @@ class q19(QPlainTextEdit):
     def _update_scroll_marks(q20):
         doc = q20.document()
         layout = doc.documentLayout()
-        doc_h = float(layout.documentSize().height())
-        if doc_h <= 1:
+
+        # 使用文档的实际行数来计算比例，这种方法在正常字号下更准确
+        total_blocks = doc.blockCount()
+        if total_blocks <= 1:
             q20.verticalScrollBar().set_markers([])
             return
 
@@ -1054,14 +1070,47 @@ class q19(QPlainTextEdit):
                             blocks.add(b.blockNumber())
                         start = idx + L
 
+                    # 为每个高亮行创建一个标注，确保精度到一行
                     for bn in sorted(blocks):
                         b = doc.findBlockByNumber(bn)
                         if not b.isValid():
                             continue
-                        # 对于 QPlainTextEdit，使用 blockBoundingGeometry 获取相对于文档的位置
-                        br = q20.blockBoundingGeometry(b)
-                        a = max(0.0, float(br.top()) / doc_h)
-                        bb = min(1.0, float(br.bottom()) / doc_h)
+                        # 使用块号与总块数的比例来计算标注位置，正常字号下更准确
+                        block_ratio = bn / float(total_blocks)
+
+                        # 计算该行的高度比例，考虑窗口宽度、字符宽度和实际渲染行数
+                        # 获取当前字体大小
+                        font_size = q20.font().pointSize()
+                        # 获取窗口宽度（编辑器内容区域宽度）
+                        viewport_width = q20.viewport().width()
+                        # 获取字体 metrics 来计算字符宽度
+                        fm = q20.fontMetrics()
+                        # 计算平均字符宽度（使用'm'字符作为参考）
+                        avg_char_width = fm.horizontalAdvance('m')
+
+                        # 获取该行文本内容
+                        line_text = b.text()
+                        # 计算该行实际渲染的行数
+                        if line_text:
+                            # 计算文本总宽度
+                            text_width = fm.horizontalAdvance(line_text)
+                            # 计算实际渲染行数（向上取整）
+                            render_lines = (text_width + viewport_width - 1) // viewport_width
+                        else:
+                            # 空行至少占一行
+                            render_lines = 1
+
+                        # 基础高度比例
+                        base_height_ratio = 1.0 / float(total_blocks)
+                        # 根据字体大小和实际渲染行数调整标注高度
+                        size_factor = max(1.0, font_size / 11.0)  # 以11px为基准
+                        line_height_ratio = base_height_ratio * size_factor * render_lines
+                        # 确保最小高度比例，对应实际显示至少2px
+                        min_height_ratio = 2.0 / float(q20.verticalScrollBar().height())
+                        line_height_ratio = max(line_height_ratio, min_height_ratio)
+
+                        a = max(0.0, block_ratio)
+                        bb = min(1.0, block_ratio + line_height_ratio)
                         markers.append(("find", a, bb))
 
         cur = q20.textCursor()
@@ -1071,10 +1120,38 @@ class q19(QPlainTextEdit):
             b1 = doc.findBlock(s)
             b2 = doc.findBlock(e - 1)
             if b1.isValid() and b2.isValid():
-                br1 = q20.blockBoundingGeometry(b1)
-                br2 = q20.blockBoundingGeometry(b2)
-                a = max(0.0, float(br1.top()) / doc_h)
-                bb = min(1.0, float(br2.bottom()) / doc_h)
+                # 使用块号与总块数的比例来计算标注位置
+                start_ratio = b1.blockNumber() / float(total_blocks)
+                end_ratio = b2.blockNumber() / float(total_blocks)
+
+                # 计算行高比例，考虑窗口宽度、字符宽度和实际渲染行数
+                font_size = q20.font().pointSize()
+                viewport_width = q20.viewport().width()
+                fm = q20.fontMetrics()
+
+                # 计算选中文本范围内的总行数（考虑实际渲染行数）
+                total_render_lines = 0
+                current_block = b1
+                while current_block.isValid() and current_block.blockNumber() <= b2.blockNumber():
+                    line_text = current_block.text()
+                    if line_text:
+                        text_width = fm.horizontalAdvance(line_text)
+                        render_lines = (text_width + viewport_width - 1) // viewport_width
+                    else:
+                        render_lines = 1
+                    total_render_lines += render_lines
+                    current_block = current_block.next()
+
+                # 基础高度比例
+                base_height_ratio = 1.0 / float(total_blocks)
+                # 根据字体大小和实际渲染行数调整标注高度
+                size_factor = max(1.0, font_size / 11.0)  # 以11px为基准
+                line_height_ratio = base_height_ratio * size_factor * total_render_lines
+                min_height_ratio = 2.0 / float(q20.verticalScrollBar().height())
+                line_height_ratio = max(line_height_ratio, min_height_ratio)
+
+                a = max(0.0, start_ratio)
+                bb = min(1.0, end_ratio + line_height_ratio)
                 markers.append(("sel", a, bb))
 
         q20.verticalScrollBar().set_markers(markers)
@@ -1399,14 +1476,9 @@ class q19(QPlainTextEdit):
         q20.q89.setGeometry(cr.left(), cr.top(), q20.q87(), cr.height())
 
     def q87(q20):
-        blocks = max(1, q20.blockCount())
-        digits = len(str(blocks))
-        fm = q20.fontMetrics()
-        try:
-            w = fm.horizontalAdvance("9" * digits)
-        except Exception:
-            w = fm.width("9" * digits)
-        return w + 1
+        # 固定行号区宽度，使用9px字体，减少11px
+        fixed_width = 30  # 固定宽度
+        return fixed_width
 
     def q90(q20, _=0):
         if q20._zen:
@@ -1423,7 +1495,23 @@ class q19(QPlainTextEdit):
 
         painter = QPainter(q20.q89)
         rect = event.rect()
-        painter.fillRect(rect, QColor(q1))
+        # 使用当前窗口的背景色
+        bg_color = q1
+        # 尝试获取窗口的背景色
+        if hasattr(q20, 'window'):
+            window = q20.window()
+            if hasattr(window, 'styleSheet'):
+                style = window.styleSheet()
+                if 'background:' in style:
+                    import re
+                    match = re.search(r'background:(.*?);', style)
+                    if match:
+                        bg_color = match.group(1).strip()
+        painter.fillRect(rect, QColor(bg_color))
+
+        # 使用9px字体
+        font = QFont("Consolas", 9)
+        painter.setFont(font)
 
         block = q20.firstVisibleBlock()
         block_num = block.blockNumber()
@@ -1436,9 +1524,10 @@ class q19(QPlainTextEdit):
                 col = QColor(q2)
                 col.setAlpha(40)
                 painter.setPen(col)
+                # 右对齐绘制行号
                 painter.drawText(0, top, q20.q89.width() - 1,
                                q20.fontMetrics().height(),
-                               Qt.AlignLeft | Qt.AlignVCenter, num)
+                               Qt.AlignRight | Qt.AlignVCenter, num)
 
             block = block.next()
             top = bottom
@@ -1461,7 +1550,6 @@ class q64(QWidget):
         super().__init__()
         q65.setWindowFlags(Qt.FramelessWindowHint)
         q65.setContextMenuPolicy(Qt.NoContextMenu)
-        q65.setStyleSheet(f"background:{q1}; border:none;")
 
         q65._wq_id = 0
         q65._wq_lock = None
@@ -1582,6 +1670,59 @@ class q64(QWidget):
             q65._wq_id, q65._wq_lock = 1, None
         q65._sync_logo()
 
+        # 根据 _wq_id 设置对应的背景色
+        bg_color = q1
+        if q65._wq_id == 2:
+            bg_color = q1_wq2
+        elif q65._wq_id == 3:
+            bg_color = q1_wq3
+        elif q65._wq_id == 4:
+            bg_color = q1_wq4
+        elif q65._wq_id == 5:
+            bg_color = q1_wq5
+        elif q65._wq_id == 6:
+            bg_color = q1_wq6
+
+        # 设置窗口背景色和顶部按钮行背景色
+        q65.setStyleSheet(f"background:{bg_color}; border:none;")
+        # 更新顶部按钮行背景色
+        if hasattr(q65, 'q73'):
+            q65.q73.setStyleSheet(f"background:{bg_color}; border:none;")
+
+        # 同时更新编辑器的背景色
+        if hasattr(q65, 'q79'):
+            editor_style = f'''
+            QPlainTextEdit {{
+                background:{bg_color};
+                color:{q2};
+                border:none;
+                selection-background-color: rgb(233,211,2);
+                selection-color: {q2};
+            }}
+            QScrollBar:vertical {{
+                background: transparent;
+                width: 6px;
+                margin: 0px;
+            }}
+            QScrollBar::handle:vertical {{
+                background: {q5};
+                min-height: 40px;
+                border-radius: 0px;
+            }}
+            QScrollBar::add-line:vertical,
+            QScrollBar::sub-line:vertical {{
+                height: 0px;
+            }}
+            QScrollBar::add-page:vertical,
+            QScrollBar::sub-page:vertical {{
+                background: none;
+            }}
+            '''
+            q65.q79.setStyleSheet(editor_style)
+            # 更新行号区域背景色
+            if hasattr(q65.q79, 'q89'):
+                q65.q79.q89.setStyleSheet(f"background:{bg_color};")
+
     def _restore_maximized(q65):
         try:
             q65.q71 = q65.geometry()
@@ -1691,6 +1832,9 @@ class q64(QWidget):
             q65.q79.setFont(f)
             if hasattr(q65.q79, "q90"):
                 q65.q79.q90(0)
+            # 字体大小改变后，重新计算滚动条标注
+            if hasattr(q65.q79, "_update_scroll_marks"):
+                q65.q79._update_scroll_marks()
             q65.q79.viewport().update()
         except Exception:
             pass
