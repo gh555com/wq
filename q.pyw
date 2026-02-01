@@ -942,6 +942,21 @@ class q19(QPlainTextEdit):
             t = tc.selectedText().replace("\u2029", "\n").strip("\n")
             if t and not t.isspace():
                 return t
+
+        # 检查当前行是否为空行
+        current_block = tc.block()
+        current_line = current_block.text().strip()
+        if not current_line:
+            return ""
+
+        # 检查光标位置是否在空格上
+        cursor_pos = tc.positionInBlock()
+        block_text = current_block.text()
+        if cursor_pos > 0 and cursor_pos <= len(block_text):
+            char_at_cursor = block_text[cursor_pos - 1]
+            if char_at_cursor.isspace():
+                return ""
+
         tmp = QTextCursor(tc)
         # 先向左移动一个字符，然后选择单词，这样就能匹配左边的内容 否则是选右边
         tmp.movePosition(QTextCursor.Left, QTextCursor.MoveAnchor)
