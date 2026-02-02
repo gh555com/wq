@@ -1,0 +1,253 @@
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ [2026-02-02T03:50:28.413Z][INFO] qqq 扩展激活（中控模式）... 
+[2026-02-02T03:50:28.413Z][INFO] Global FFmpeg initialized from assets: e:\s\wol\py\q3\assets\ffmpeg.exe 
+[2026-02-02T03:50:28.418Z][INFO] [UserTracking] 恢复上次未保存的会话时间: 300秒 
+[2026-02-02T03:50:32.727Z][INFO] Q2: 文件管理器已激活（使用 geq().js 四级回退 + size调度/缓存 + 最新 IO 路径逻辑） 
+[2026-02-02T03:50:32.728Z][INFO] qqq 扩展激活完成 
+[2026-02-02T03:50:32.750Z][INFO] ==================================================== 
+[2026-02-02T03:50:32.750Z][INFO] 🚀 Q-ENGINE STARTING | VERSION: 15.59.12 | 2/2/2026, 11:50:32 AM 
+[2026-02-02T03:50:32.750Z][INFO] 🎯 ACTIVE FFmpeg: e:\s\wol\py\q3\assets\ffmpeg.exe (ASSETS (Verified)) 
+[2026-02-02T03:50:32.750Z][INFO] ==================================================== 
+[2026-02-02T03:50:32.750Z][INFO] 开始启动守护进程，用户选择的引擎: auto  
+[2026-02-02T03:50:32.750Z][INFO] 启动 Shell bridge... 
+[2026-02-02T03:50:32.751Z][DEBUG] 尝试启动 PowerShell 进程 
+[2026-02-02T03:50:32.751Z][DEBUG] 尝试使用选项 1 启动 PowerShell: powershell.exe 
+[2026-02-02T03:50:32.754Z][DEBUG] PowerShell 进程已创建: powershell.exe 
+[2026-02-02T03:50:32.755Z][INFO] 启动 Python bridge... 
+[2026-02-02T03:50:32.757Z][INFO] 启动 Rust bridge... 
+[2026-02-02T03:50:32.757Z][WARN] Rust Bridge 可执行文件未找到 
+[2026-02-02T03:50:32.819Z][INFO] [PythonCheck] Level 3 命中: 使用系统环境变量路径 E:\s\d\python3810\python.exe 
+[2026-02-02T03:50:33.064Z][WARN] Rust Bridge 启动失败：exe_not_found: q_win_x64.exe 
+[2026-02-02T03:50:33.066Z][INFO] [PythonCheck] miniaudio, Pillow, pywin32 检测成功, 冷却期剩余: 71小时34分钟 
+[2026-02-02T03:50:33.066Z][INFO] [Python] 尝试 spawn: python "e:\s\wol\py\q3\dist\kp.py" --daemon 
+[2026-02-02T03:50:33.588Z][WARN] Python stderr: Daemon started. PID=8640
+ 
+[2026-02-02T03:50:33.589Z][INFO] Python bridge started and handshaked 
+[2026-02-02T03:50:33.589Z][INFO] Python Bridge 使用 python 启动成功 
+[2026-02-02T03:50:33.589Z][INFO] Python Bridge OK 
+[2026-02-02T03:50:33.670Z][INFO] Integrity: PASSED 
+[2026-02-02T03:50:33.670Z][INFO] FFmpeg Path: e:\s\wol\py\q3\assets\ffmpeg.exe 
+[2026-02-02T03:50:33.671Z][INFO] Q2 Integrity: PASSED 
+[2026-02-02T03:50:35.363Z][INFO] Shell bridge started and handshaked 
+[2026-02-02T03:50:35.363Z][INFO] Shell Bridge OK 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

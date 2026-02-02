@@ -1,4 +1,59 @@
-import sys
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+   import sys
 import os
 import signal
 import time
@@ -110,13 +165,8 @@ q2 = "#5a4630"
 q5 = "rgba(220, 50, 47, 128)"
 q83 = "rgba(0,0,0,20)"
 
-# ✅ 框选颜色：橙红底白字（与匹配高亮区分）
-SEL_BG = QColor("#ff4500")
-SEL_FG = QColor("#ffffff")
-
-# 匹配高亮仍保留黄底（半透明），与框选区分
+SEL_BG = QColor(233, 211, 2)
 MATCH_BG = QColor(233, 211, 2, 150)
-
 MARK_COLOR = QColor("#3b2d05")
 IMG_BORDER_COLOR = QColor("#8c7a3e")
 IMG_HOVER_BORDER = QColor("#FF6600")
@@ -309,21 +359,6 @@ def _normalize_text(s: str) -> str:
         s = s.replace("\u200b", "")
     return s
 
-# ✅ 单击高亮“选词”专用：把这些符号当作硬分隔（单击在符号旁边 => 不选中）
-_TOKEN_SEP = set(r"""`~!@#$%^&*()-=+[{]}\|;:'",.<>/?""")
-_TOKEN_SEP.add("\\")
-_TOKEN_SEP.update({
-    "，", "。", "；", "：", "！", "？", "（", "）", "【", "】", "「", "」",
-    "《", "》", "“", "”", "‘", "’", "、"
-})
-
-def _is_token_sep(ch: str) -> bool:
-    if not ch:
-        return True
-    if ch.isspace():
-        return True
-    return ch in _TOKEN_SEP
-
 _IMG_SRC_RE = None
 def _extract_img_srcs(html: str):
     global _IMG_SRC_RE
@@ -484,22 +519,22 @@ class qSB(QScrollBar):
         c.setAlpha(255)
         p.setBrush(c)
         for kind, a, b in self._markers:
-            y1 = int(a * h)
-            y2 = int(b * h)
-            # 确保上下宽度最小为1px，提高精度
-            if y2 <= y1:
-                y2 = y1 + 1
-            if (y2 - y1) < 1:
-                y2 = y1 + 1
-            y1 = max(0, y1)
-            y2 = min(h, y2)
-            if kind == "find":
-                x = 1 if w >= 3 else 0
-                ww = max(1, w - 2) if w >= 3 else w
-            else:
-                x = 0
-                ww = w
-            p.drawRect(x, y1, ww, y2 - y1)
+                y1 = int(a * h)
+                y2 = int(b * h)
+                # 确保上下宽度最小为1px，提高精度
+                if y2 <= y1:
+                    y2 = y1 + 1
+                if (y2 - y1) < 1:
+                    y2 = y1 + 1
+                y1 = max(0, y1)
+                y2 = min(h, y2)
+                if kind == "find":
+                    x = 1 if w >= 3 else 0
+                    ww = max(1, w - 2) if w >= 3 else w
+                else:
+                    x = 0
+                    ww = w
+                p.drawRect(x, y1, ww, y2 - y1)
         p.end()
 
 
@@ -550,8 +585,8 @@ class q19(QPlainTextEdit):
             background:{q1};
             color:{q2};
             border:none;
-            selection-background-color: rgb(255,69,0);
-            selection-color: #ffffff;
+            selection-background-color: rgb(233,211,2);
+            selection-color: {q2};
         }}
         QScrollBar:vertical {{
             background: transparent;
@@ -575,7 +610,7 @@ class q19(QPlainTextEdit):
 
         pal = q20.palette()
         pal.setColor(QPalette.Highlight, SEL_BG)
-        pal.setColor(QPalette.HighlightedText, SEL_FG)
+        pal.setColor(QPalette.HighlightedText, QColor(q2))
         q20.setPalette(pal)
 
         # 图片系统
@@ -1077,62 +1112,31 @@ class q19(QPlainTextEdit):
             q20._update_scroll_marks()
 
     def _needle(q20):
-        """
-        ✅ 修复单击触发“选中高亮”选不准：
-        - 有框选：严格用框选内容作为 needle（不 strip，不改内容）
-        - 无框选：用“硬分隔符”规则做 token 抽取：
-          * 光标紧贴符号（左侧字符是分隔符）=> 不选中
-          * 否则从光标左侧字符向两边扩展，得到 token
-        """
         tc = q20.textCursor()
-
-        # ✅ 框选：严格高亮框选内容
         if tc.hasSelection():
-            t = tc.selectedText().replace("\u2029", "\n")
+            t = tc.selectedText().replace("\u2029", "\n").strip("\n")
             if t and not t.isspace():
                 return t
+
+        # 检查当前行是否为空行
+        current_block = tc.block()
+        current_line = current_block.text().strip()
+        if not current_line:
             return ""
 
-        block = tc.block()
-        if not block.isValid():
-            return ""
-
-        line = block.text()
-        if not line:
-            return ""
-
-        pos = tc.positionInBlock()
-        if pos < 0:
-            return ""
-
-        # 光标在行首：必须右侧是 token 才能选中
-        if pos == 0:
-            ch_r = line[0] if len(line) > 0 else ""
-            if not ch_r or _is_token_sep(ch_r):
+        # 检查光标位置是否在空格上
+        cursor_pos = tc.positionInBlock()
+        block_text = current_block.text()
+        if cursor_pos > 0 and cursor_pos <= len(block_text):
+            char_at_cursor = block_text[cursor_pos - 1]
+            if char_at_cursor.isspace():
                 return ""
-            idx = 0
-        else:
-            ch_l = line[pos - 1] if pos - 1 < len(line) else ""
-            # ✅ “符号旁边”不选：只要左侧字符是分隔符就直接不选
-            if _is_token_sep(ch_l):
-                return ""
-            idx = pos - 1
 
-        # idx 必须落在 token 内
-        if idx < 0 or idx >= len(line):
-            return ""
-        if _is_token_sep(line[idx]):
-            return ""
-
-        # 向两边扩展 token
-        a = idx
-        while a > 0 and (not _is_token_sep(line[a - 1])):
-            a -= 1
-        b = idx + 1
-        while b < len(line) and (not _is_token_sep(line[b])):
-            b += 1
-
-        t = line[a:b]
+        tmp = QTextCursor(tc)
+        # 先向左移动一个字符，然后选择单词，这样就能匹配左边的内容 否则是选右边
+        tmp.movePosition(QTextCursor.Left, QTextCursor.MoveAnchor)
+        tmp.select(QTextCursor.WordUnderCursor)
+        t = tmp.selectedText().strip()
         if t and not t.isspace():
             return t
         return ""
@@ -1387,11 +1391,11 @@ class q19(QPlainTextEdit):
 
             if window_id:
                 # 设置字体和颜色（字号减小1px，字体Tahoma）
-                font = QFont("Tahoma", 8, QFont.Bold)
+                font = QFont("Tahoma", 8, QFont.Bold )
                 p.setFont(font)
                 p.setPen(QColor("#ffffff"))
                 # 在圆形中央绘制字符
-                text_rect = QRectF(cx - radius + 1, cy - radius - 2, dot_d, dot_d)
+                text_rect = QRectF(cx - radius + 1 , cy - radius - 2, dot_d, dot_d)
                 p.drawText(text_rect, Qt.AlignCenter, window_id)
 
         p.end()
@@ -1602,15 +1606,6 @@ class q19(QPlainTextEdit):
 
     def _on_selection_changed(q20):
         q20._pending_single = False
-
-        # ✅ 新逻辑：只要“有框选”，就严格高亮框选内容（不区分鼠标/键盘）
-        try:
-            if q20.textCursor().hasSelection():
-                q20.q96()
-                return
-        except Exception:
-            pass
-
         if q20._mouse_trigger:
             q20.q96()
         else:
@@ -1762,6 +1757,8 @@ class q64(QWidget):
         q65._is_modifier_pressed = False  # table 或 f2 是否被按下
         q65._modifier_release_times = []  # table 或 f2 释放的时间戳
         q65._MODIFIER_DELAY = 600  # 600ms 内三次按键关闭窗口
+
+
 
         # 添加到全局窗口列表
         global _windows
@@ -2030,8 +2027,8 @@ class q64(QWidget):
                     background:{bg_color};
                     color:{q2};
                     border:none;
-                    selection-background-color: rgb(255,69,0);
-                    selection-color: #ffffff;
+                    selection-background-color: rgb(233,211,2);
+                    selection-color: {q2};
                 }}
                 QScrollBar:vertical {{
                     background: transparent;
@@ -2265,6 +2262,8 @@ class q64(QWidget):
         key = event.key()
         event.ignore()
 
+
+
     def changeEvent(q65, e):
         super().changeEvent(e)
         q65._sync_max_button()
@@ -2414,4 +2413,193 @@ if __name__ == "__main__":
     finally:
         # 确保键盘监听器被停止
         if _keyboard_listener:
-            _keyboard_listener.stop()
+            _keyboard_listener.stop()     现在我们程序只改一个问题： 就是由用户单击触发滴选中高亮 有一个选不准滴问题。 
+   比如有这样一段话： 
+“[501Z][INFO] assets\ffmpeg.exe”
+
+
+ 我将光标放在最末尾他选中滴是“g.e” 很明显他应该选择“exe” 才对, 
+又比如我将光标放在 ff左边 也就是 \右边 他选中滴是 s\ 左边滴字符“t”, 这次是在符号旁边我期望他没有任何选中 
+ 又比如我将光标放在 ffm右边 也就是 peg 左边, 他选中滴是 “s\ffmp” , 跟之前一样是完全乱套滴, 我期望滴是他选中“ffmpeg” 且无论我单击 “ffmpeg” 中间滴哪一个字符, 选中滴都应该是 “ffmpeg”
+又比如我将光标放在 “[INFO]”滴尾部, 也就是 ] 右边, 就会发生更奇怪滴问题 他选中滴是：“[501Z][INFO]” 之中滴 1 和 F 两 个字符 , 这次是在符号旁边我期望他没有任何选中 
+
+ 对于期望值再举例 比如有这样一句话： “{base.y()},{base.width()}” 现在用 q 来代表光标滴位置,
+ 如果是 “{base.yq()},{base.width()}”   我期望选中滴是 y 
+“{base.y()},{base.widthq()}”  我期望选中滴是 width 
+“{base.y()},{baseq.width()}” 我希望选中滴是 base
+“{base.qy()},{base.width(q)}q” 三种情况对应在符号旁边：我希望没有任何被选中 
+ 
+ 简单讲我觉得逻辑可以是：单击触发滴高亮就等同于： 先假设我们在那里双击, 模拟出双击会被框选滴结果, 将该结果高亮。
+
+另一方面滴, 要改一改框选中 滴颜色, 现在区分不出哪些是高亮哪些是用户框选滴, 导致用户很难确定他将要复制啥, 让框选滴颜色变为：橙红底白字。 
+
+ 另一方面额外再加一个逻辑： 框选会触发特定滴高亮： 框选了啥 就全局严格高亮啥, 比如我框选了 ()} 那就全局高亮 ()}, 比如我框选了 “ffmpeg” 之中滴 ff , 那就只是全局高亮 ff 。 
+
+
+ 注意不要改到或破坏了上方之外滴其他任何逻辑。 给更正滴代码滴完整代码、一滴不漏     
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
