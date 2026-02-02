@@ -1,3 +1,206 @@
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+orange_black
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+[2026-02-02T04:22:45.412Z][INFO] qqq 扩展激活（中控模式）... 
+[2026-02-02T04:22:45.413Z][INFO] Global FFmpeg initialized from assets: e:\s\wol\py\q3\assets\ffmpeg.exe 
+[2026-02-02T04:22:45.417Z][INFO] [UserTracking] 恢复上次未保存的会话时间: 120秒 
+[2026-02-02T04:22:49.968Z][INFO] Q2: 文件管理器已激活（使用 geq().js 四级回退 + size调度/缓存 + 最新 IO 路径逻辑） 
+[2026-02-02T04:22:49.969Z][INFO] qqq 扩展激活完成 
+[2026-02-02T04:22:49.991Z][INFO] ==================================================== 
+[2026-02-02T04:22:49.991Z][INFO] 🚀 Q-ENGINE STARTING | VERSION: 15.59.13 | 2/2/2026, 12:22:49 PM 
+[2026-02-02T04:22:49.991Z][INFO] 🎯 ACTIVE FFmpeg: e:\s\wol\py\q3\assets\ffmpeg.exe (ASSETS (Verified)) 
+[2026-02-02T04:22:49.991Z][INFO] ==================================================== 
+[2026-02-02T04:22:49.991Z][INFO] 开始启动守护进程，用户选择的引擎: auto  
+[2026-02-02T04:22:49.991Z][INFO] 启动 Shell bridge... 
+[2026-02-02T04:22:49.992Z][DEBUG] 尝试启动 PowerShell 进程 
+[2026-02-02T04:22:49.992Z][DEBUG] 尝试使用选项 1 启动 PowerShell: powershell.exe 
+[2026-02-02T04:22:49.996Z][DEBUG] PowerShell 进程已创建: powershell.exe 
+[2026-02-02T04:22:49.997Z][INFO] 启动 Python bridge... 
+[2026-02-02T04:22:49.998Z][INFO] 启动 Rust bridge... 
+[2026-02-02T04:22:49.998Z][WARN] Rust Bridge 可执行文件未找到 
+[2026-02-02T04:22:50.057Z][INFO] [PythonCheck] Level 3 命中: 使用系统环境变量路径 E:\s\d\python3810\python.exe 
+[2026-02-02T04:22:50.119Z][WARN] Rust Bridge 启动失败：exe_not_found: q_win_x64.exe 
+[2026-02-02T04:22:50.121Z][INFO] [PythonCheck] 缺失: miniaudio, Pillow, pywin32 (原因: miniaudio: 检测失败, Pillow: 检测失败, pywin32: 检测失败), 不在冷却期 
+[2026-02-02T04:22:50.121Z][INFO] [Python] 尝试 spawn: python "e:\s\wol\py\q3\dist\kp.py" --daemon 
+[2026-02-02T04:22:50.637Z][WARN] Python stderr: Daemon started. PID=35016
+ 
+[2026-02-02T04:22:50.638Z][INFO] Python bridge started and handshaked 
+[2026-02-02T04:22:50.638Z][INFO] Python Bridge 使用 python 启动成功 
+[2026-02-02T04:22:50.638Z][INFO] Python Bridge OK 
+[2026-02-02T04:22:50.681Z][INFO] Integrity: PASSED 
+[2026-02-02T04:22:50.681Z][INFO] FFmpeg Path: e:\s\wol\py\q3\assets\ffmpeg.exe 
+[2026-02-02T04:22:50.682Z][INFO] Q2 Integrity: PASSED 
+[2026-02-02T04:22:52.619Z][INFO] Shell bridge started and handshaked 
+[2026-02-02T04:22:52.620Z][INFO] Shell Bridge OK 
+[2026-02-02T04:22:52.952Z][WARN] Python 错误响应: not ok: miniaudio API mismatch
+miniaudio import failed
+ModuleNotFoundError: No module named 'miniaudio'
+
+--- diagnostics ---
+python: 3.8.10 (tags/v3.8.10:3d8993a, May  3 2021, 11:48:03) [MSC v.1928 64 bit (AMD64)]
+platform: win32
+cwd: E:\s\d\qoder
+miniaudio: IMPORT FAILED
+import error: ModuleNotFoundError: No module named 'miniaudio' 
+[2026-02-02T04:22:52.952Z][WARN] [Audio] Python 引擎已连接但未检测到 miniaudio 依赖 
+[2026-02-02T04:22:52.953Z][WARN] [Audio] Python 引擎探测未通过，使用 Webview 兜底 
+[2026-02-02T04:22:52.954Z][INFO] [Audio] Webview 引擎播放品味: 3.mp3, 循环: 6 
+[2026-02-02T04:23:10.129Z][INFO] [PythonCheck] 触发后台依赖安装检查 
+[2026-02-02T04:23:10.130Z][INFO] [PythonCheck] 开始安装依赖: miniaudio, Pillow, pywin32 
+[2026-02-02T04:23:18.891Z][INFO] [PythonCheck] 依赖安装成功: miniaudio, Pillow, pywin32 
+[2026-02-02T04:23:18.892Z][INFO] [PythonCheck] 安装详情: 目录=C:\Users\q\AppData\Roaming\Python\Python38\site-packages, 环境域=用户全局环境, 耗时=8.69秒 
+[2026-02-02T04:23:25.630Z][ERROR] 未捕获的异常: 308608:error:1e000065:Cipher functions:OPENSSL_internal:BAD_DECRYPT:..\..\third_party\boringssl\src\crypto\fipsmodule\cipher\e_aes.cc.inc:839:
+
+Error: 308608:error:1e000065:Cipher functions:OPENSSL_internal:BAD_DECRYPT:..\..\third_party\boringssl\src\crypto\fipsmodule\cipher\e_aes.cc.inc:839:
+ 
+[2026-02-02T04:23:47.685Z][INFO] [Audio] Webview 引擎播放品味: 1.mp3, 循环: 5 
+[2026-02-02T04:23:52.116Z][INFO] [Audio] Webview 引擎播放品味: q.mp3, 循环: 2 
+
+
+
+   Level 3 命中: 使用系统环境变量路径 E:\s\d\python3810\python.exe  那不应该安装在 E:\s\d\python3810\python.exe , 为啥安装到 C:\Users\q\AppData\Roaming\Python\Python38\site-packages 
+
+而且接下来每次启动都会有 
+[2026-02-02T04:28:17.415Z][INFO] Q2 Integrity: PASSED 
+[2026-02-02T04:28:19.100Z][INFO] Shell bridge started and handshaked 
+[2026-02-02T04:28:19.100Z][INFO] Shell Bridge OK 
+[2026-02-02T04:28:26.017Z][ERROR] 未捕获的异常: 313088:error:1e000065:Cipher functions:OPENSSL_internal:BAD_DECRYPT:..\..\third_party\boringssl\src\crypto\fipsmodule\cipher\e_aes.cc.inc:839:
+
+Error: 313088:error:1e000065:Cipher functions:OPENSSL_internal:BAD_DECRYPT:..\..\third_party\boringssl\src\crypto\fipsmodule\cipher\e_aes.cc.inc:839:
+ 
+[2026-02-02T04:28:57.433Z][INFO] [Audio] Python (miniaudio v1.61) 检测成功 
+[2026-02-02T04:28:57.434Z][INFO] [Audio] Python 引擎播放: 2.mp3, 循环: 6 
+
+
+  另一方面如果你这样改：         installEnv = { ...process.env, PYTHONNOUSERSITE: '1' };
+            } else {
+                // 系统Python，尝试直接安装（不使用--user）
+                cmd = `"${pythonBin}" -m pip install ${pkgs} --quiet --index-url https://mirrors.aliyun.com/pypi/simple/`;
+                installEnv = process.env; 
+
+
+接下来他又会报错： 
+
+
+
+
+[2026-02-02T04:52:18.564Z][INFO] [PythonCheck] 触发后台依赖安装检查 
+[2026-02-02T04:52:18.565Z][INFO] [PythonCheck] 开始安装依赖: miniaudio, Pillow, pywin32 
+[2026-02-02T04:52:22.107Z][ERROR] [PythonCheck] 依赖安装失败: Command failed: "python" -m pip install miniaudio Pillow pywin32 --quiet --index-url https://mirrors.aliyun.com/pypi/simple/
+ERROR: Could not install packages due to an OSError: [WinError 5] �ܾ����ʡ�: 'E:\\s\\d\\python3810\\Lib\\site-packages\\pywin32_system32\\pythoncom38.dll'
+Consider using the `--user` option or check the permissions.
+
+
+
+
+
+
+
+
+
+
 import sys
 import os
 import signal
@@ -106,7 +309,7 @@ q83 = "rgba(0,0,0,20)"
 # 你要换选中底色，只改这里即可：
 # - "orange_black": 橙黑色稍透明
 # - "dark_gold": 深暗金色
-SELECTION_THEME = "dark_gold"   # <- 改这里
+SELECTION_THEME = "orange_black"   # <- 改这里
 
 _BG_COLOR_MAP = {
     'q': q1,
@@ -118,6 +321,9 @@ _BG_COLOR_MAP = {
 }
 
 _SELECTION_THEMES = {
+    # "orange_black": (QColor(248, 48, 0, 160), QColor(255, 255, 255)),   # rgba(48,22,0,180)
+
+
     "orange_black": (QColor(214, 0, 0, 112), QColor(255, 255, 255)),
     "dark_gold":    (QColor(111, 76, 11, 177 ),    QColor(255, 255, 255)),   # rgb(132,98,16)
 }
@@ -570,13 +776,6 @@ class q19(QPlainTextEdit):
         q20._debounce_timer.setSingleShot(True)
         q20._debounce_timer.timeout.connect(q20._flush_debounced_refresh)
 
-        # ✅ q框：最高优先级查找高亮 + 防抖
-        q20._qbox_line = None
-        q20._qbox_ms = 96
-        q20._qbox_timer = QTimer(q20)
-        q20._qbox_timer.setSingleShot(True)
-        q20._qbox_timer.timeout.connect(q20._flush_qbox_highlight)
-
         q20.setFont(QFont("Consolas", 11))
         q20.setUndoRedoEnabled(False)
         q20.setContextMenuPolicy(Qt.NoContextMenu)
@@ -648,40 +847,6 @@ class q19(QPlainTextEdit):
         q20._last_text = init_text
         q20.q90(0)
 
-    # ==================== q框绑定/读取 ====================
-
-    def bind_qbox(q20, line_edit: QLineEdit):
-        q20._qbox_line = line_edit
-
-    def _qbox_text(q20) -> str:
-        try:
-            if q20._qbox_line is None:
-                return ""
-            t = q20._qbox_line.text()
-            t = _normalize_text(t)
-            if not t or t.isspace():
-                return ""
-            return t
-        except Exception:
-            return ""
-
-    def _qbox_active(q20) -> bool:
-        return bool(q20._qbox_text())
-
-    def _schedule_qbox_highlight(q20):
-        try:
-            q20._qbox_timer.start(q20._qbox_ms)
-        except Exception:
-            q20.q96()
-
-    def _flush_qbox_highlight(q20):
-        try:
-            q20._apply_match_highlight(q20._needle())
-        except Exception:
-            pass
-
-    # ==================== 文档大小 ====================
-
     def doc_size_bytes(q20) -> int:
         try:
             plain = q20.toPlainText() or ""
@@ -742,8 +907,7 @@ class q19(QPlainTextEdit):
         if not deleted_text and not inserted_text:
             return
 
-        # ✅ 原逻辑会清掉匹配高亮；但 q框必须持续生效
-        if q20._last_needle and (not q20._qbox_active()):
+        if q20._last_needle:
             try:
                 q20.setExtraSelections([])
             except Exception:
@@ -1062,7 +1226,7 @@ class q19(QPlainTextEdit):
             md.setData(mime_type, QByteArray(raw))
 
             img = _load_image_from_bytes(raw)
-            if isinstance(img, QImage) and (not img.isNull()):
+            if not img.isNull():
                 md.setImageData(img)
                 try:
                     png_raw = _qimage_to_png_bytes(img)
@@ -1100,11 +1264,6 @@ class q19(QPlainTextEdit):
             q20._update_scroll_marks()
 
     def _needle(q20):
-        # ✅ 最高优先级：q框
-        qt = q20._qbox_text()
-        if qt:
-            return qt
-
         tc = q20.textCursor()
 
         if tc.hasSelection():
@@ -1161,39 +1320,42 @@ class q19(QPlainTextEdit):
             q20._update_scroll_marks()
             return
 
-        # ✅ q框优先级最高：q框生效时，不做“跳过当前选区自身”逻辑
-        qbox_active = q20._qbox_active()
-
-        tc0 = q20.textCursor()
-        sel_start = tc0.selectionStart()
-        sel_end = tc0.selectionEnd()
-        has_sel = bool(tc0.hasSelection()) and (not qbox_active)
+        tc = q20.textCursor()
+        sel_start = tc.selectionStart()
+        sel_end = tc.selectionEnd()
+        has_sel = tc.hasSelection()
 
         fmt = QTextCharFormat()
         fmt.setBackground(MATCH_BG)
         fmt.setForeground(QColor(q2))
 
-        doc = q20.document()
-        pos = 0
-        while True:
-            c = doc.find(needle, pos)
-            if c.isNull():
-                break
+        plain = q20.toPlainText()
+        L = len(needle)
+        if L <= 0:
+            q20.setExtraSelections([])
+            q20._last_needle = ""
+            q20._update_scroll_marks()
+            return
 
-            if has_sel and c.selectionStart() == sel_start and c.selectionEnd() == sel_end:
-                pos = max(pos + 1, c.selectionEnd())
+        start = 0
+        doc = q20.document()
+        while True:
+            idx = plain.find(needle, start)
+            if idx == -1:
+                break
+            if has_sel and idx == sel_start and (idx + L) == sel_end:
+                start = idx + L
                 continue
+
+            c = QTextCursor(doc)
+            c.setPosition(idx)
+            c.setPosition(idx + L, QTextCursor.KeepAnchor)
 
             es = QTextEdit.ExtraSelection()
             es.cursor = c
             es.format = fmt
             extras.append(es)
-
-            endp = c.selectionEnd()
-            if endp <= pos:
-                pos += 1
-            else:
-                pos = endp
+            start = idx + L
 
         q20.setExtraSelections(extras)
         q20._last_needle = needle
@@ -1213,40 +1375,29 @@ class q19(QPlainTextEdit):
 
         needle = q20._last_needle
         if needle:
+            plain = q20.toPlainText()
             L = len(needle)
-            if L > 0:
-                # ✅ 性能：用 QTextDocument.find；过大时仍避免全量扫
-                try:
-                    doc_len = int(doc.characterCount())
-                except Exception:
-                    doc_len = 0
-
-                if doc_len <= 2_000_000 and doc_len > 0:
+            if L > 0 and plain:
+                if len(plain) <= 2_000_000:
+                    start = 0
                     blocks = set()
 
                     tc = q20.textCursor()
                     sel_start = tc.selectionStart()
                     sel_end = tc.selectionEnd()
-                    has_sel = tc.hasSelection() and (not q20._qbox_active())
+                    has_sel = tc.hasSelection()
 
-                    pos = 0
                     while True:
-                        c = doc.find(needle, pos)
-                        if c.isNull():
+                        idx = plain.find(needle, start)
+                        if idx == -1:
                             break
-                        if has_sel and c.selectionStart() == sel_start and c.selectionEnd() == sel_end:
-                            pos = max(pos + 1, c.selectionEnd())
+                        if has_sel and idx == sel_start and (idx + L) == sel_end:
+                            start = idx + L
                             continue
-
-                        b = doc.findBlock(c.selectionStart())
+                        b = doc.findBlock(idx)
                         if b.isValid():
                             blocks.add(b.blockNumber())
-
-                        endp = c.selectionEnd()
-                        if endp <= pos:
-                            pos += 1
-                        else:
-                            pos = endp
+                        start = idx + L
 
                     for bn in sorted(blocks):
                         b = doc.findBlockByNumber(bn)
@@ -1312,133 +1463,6 @@ class q19(QPlainTextEdit):
 
         q20.verticalScrollBar().set_markers(markers)
 
-    # ==================== q框回车跳转 + 替换 ====================
-
-    def _scroll_cursor_to_target(q20, from_bottom_line: int = 8):
-        try:
-            vp = q20.viewport().rect()
-            if vp.isNull():
-                return
-            fm = q20.fontMetrics()
-            lh = max(1, int(fm.height()))
-            vis_lines = max(1, int(vp.height() / float(lh)))
-            k = max(0, min(int(from_bottom_line), vis_lines - 1))
-
-            # 目标：从底部数第 k 行附近
-            desired_y = int(vp.height() - (k + 0.6) * lh)
-
-            r = q20.cursorRect(q20.textCursor())
-            delta = int(r.top() - desired_y)
-
-            sb = q20.verticalScrollBar()
-            v = int(sb.value())
-            nv = v + delta
-            nv = max(int(sb.minimum()), min(int(sb.maximum()), nv))
-            sb.setValue(nv)
-        except Exception:
-            pass
-
-    def jump_to_next_qbox_match(q20, from_bottom_line: int = 8):
-        needle = q20._qbox_text()
-        if not needle:
-            return
-
-        try:
-            doc = q20.document()
-            start_pos = q20.textCursor().position()
-
-            c = doc.find(needle, start_pos)
-            if c.isNull():
-                c = doc.find(needle, 0)
-                if c.isNull():
-                    return
-
-            endp = c.selectionEnd()
-            tc = q20.textCursor()
-            tc.setPosition(endp)
-            q20.setTextCursor(tc)
-            q20.setFocus(Qt.OtherFocusReason)
-            q20.ensureCursorVisible()
-
-            QTimer.singleShot(0, lambda: q20._scroll_cursor_to_target(from_bottom_line))
-        except Exception:
-            pass
-
-    def replace_next(q20, needle: str, repl: str):
-        if not needle:
-            return
-        try:
-            doc = q20.document()
-            start_pos = q20.textCursor().position()
-
-            c = doc.find(needle, start_pos)
-            if c.isNull():
-                c = doc.find(needle, 0)
-                if c.isNull():
-                    return
-
-            c.beginEditBlock()
-            try:
-                c.insertText(repl)
-            finally:
-                c.endEditBlock()
-
-            tc = q20.textCursor()
-            tc.setPosition(c.position())
-            q20.setTextCursor(tc)
-            q20.setFocus(Qt.OtherFocusReason)
-
-            q20._schedule_qbox_highlight()
-            q20._schedule_debounced_refresh()
-        except Exception:
-            pass
-
-    def replace_all(q20, needle: str, repl: str):
-        if not needle:
-            return
-        try:
-            plain = q20.toPlainText()
-        except Exception:
-            return
-
-        if not plain or needle not in plain:
-            return
-
-        try:
-            cur_pos = q20.textCursor().position()
-        except Exception:
-            cur_pos = 0
-
-        try:
-            sb = q20.verticalScrollBar()
-            sv = int(sb.value())
-        except Exception:
-            sv = None
-
-        try:
-            new_plain = plain.replace(needle, repl)
-            if new_plain == plain:
-                return
-            q20.setPlainText(new_plain)
-
-            try:
-                tc = q20.textCursor()
-                tc.setPosition(min(cur_pos, max(0, len(new_plain))))
-                q20.setTextCursor(tc)
-            except Exception:
-                pass
-
-            if sv is not None:
-                try:
-                    q20.verticalScrollBar().setValue(sv)
-                except Exception:
-                    pass
-
-            q20._schedule_qbox_highlight()
-            q20._schedule_debounced_refresh()
-        except Exception:
-            pass
-
     # ==================== 事件处理 ====================
 
     def _schedule_debounced_refresh(q20):
@@ -1449,13 +1473,6 @@ class q19(QPlainTextEdit):
             q20.q89.update()
         q20._update_hover()
         q20._update_scroll_marks()
-
-        # ✅ q框持续生效：文档变化后也要重新应用高亮（防抖后做）
-        if q20._qbox_active():
-            try:
-                q20._apply_match_highlight(q20._needle())
-            except Exception:
-                pass
 
     def paintEvent(q20, e):
         super().paintEvent(e)
@@ -1902,13 +1919,6 @@ class q64(QWidget):
         except Exception:
             pass
 
-        # ✅ 替换条若可见，随窗口变化重新定位
-        try:
-            if hasattr(q65, "q_replace_panel") and q65.q_replace_panel.isVisible():
-                q65._position_replace_panel()
-        except Exception:
-            pass
-
     def _doc_size_bytes(q65) -> int:
         try:
             ed = q65.q79
@@ -1961,31 +1971,12 @@ class q64(QWidget):
             q65.q79.setPlainText("\n" * _START_EMPTY_LINES)
         q65.q79._last_text = q65.q79.toPlainText()
 
-        # ✅ 绑定 q框（最高优先级查找）
-        try:
-            if hasattr(q65, "q_qbox") and q65.q_qbox is not None:
-                q65.q79.bind_qbox(q65.q_qbox)
-                try:
-                    q65.q_qbox.textChanged.connect(q65.q79._schedule_qbox_highlight)
-                except Exception:
-                    pass
-                try:
-                    q65.q_qbox.returnPressed.connect(q65._qbox_enter_jump)
-                except Exception:
-                    pass
-        except Exception:
-            pass
-
         q65.q72.insertWidget(1, q65.q79)
 
         for w in [q65, q65.q73, q65.q79, q65.q79.viewport(),
-                  q65.q_font_box, getattr(q65, "q_qbox", None),
-                  getattr(q65, "q_replace_panel", None), getattr(q65, "q_replace_box", None),
-                  getattr(q65, "q_btn_rep_one", None), getattr(q65, "q_btn_rep_all", None),
-                  q65.q75, q65.q76, q65.q77, q65.q_logo]:
+                  q65.q_font_box, q65.q75, q65.q76, q65.q77, q65.q_logo]:
             try:
-                if w is not None:
-                    w.installEventFilter(q65)
+                w.installEventFilter(q65)
             except Exception:
                 pass
 
@@ -2143,85 +2134,6 @@ class q64(QWidget):
             return
         q65.q76.setText("❐" if q65.isMaximized() else "□")
 
-    # ==================== q框右键替换条 ====================
-
-    def _position_replace_panel(q65):
-        try:
-            if not hasattr(q65, "q_replace_panel") or q65.q_replace_panel is None:
-                return
-            if not hasattr(q65, "q_qbox") or q65.q_qbox is None:
-                return
-            p = q65.q_qbox.mapTo(q65, QPoint(0, q65.q_qbox.height()))
-            q65.q_replace_panel.move(int(p.x()), int(p.y()))
-            q65.q_replace_panel.raise_()
-        except Exception:
-            pass
-
-    def _toggle_replace_panel(q65):
-        try:
-            if not hasattr(q65, "q_replace_panel") or q65.q_replace_panel is None:
-                return
-            if q65.q_replace_panel.isVisible():
-                q65.q_replace_panel.hide()
-            else:
-                q65._position_replace_panel()
-                q65.q_replace_panel.show()
-                q65.q_replace_panel.raise_()
-                try:
-                    if hasattr(q65, "q_replace_box") and q65.q_replace_box is not None:
-                        q65.q_replace_box.setFocus(Qt.OtherFocusReason)
-                except Exception:
-                    pass
-        except Exception:
-            pass
-
-    def _qbox_enter_jump(q65):
-        try:
-            if hasattr(q65, "q79") and hasattr(q65.q79, "jump_to_next_qbox_match"):
-                q65.q79.jump_to_next_qbox_match(8)
-        except Exception:
-            pass
-
-    def _do_replace_one(q65):
-        try:
-            if not hasattr(q65, "q79"):
-                return
-            if not hasattr(q65, "q_qbox") or q65.q_qbox is None:
-                return
-            needle = _normalize_text(q65.q_qbox.text() or "")
-            if not needle or needle.isspace():
-                return
-            repl = ""
-            try:
-                if hasattr(q65, "q_replace_box") and q65.q_replace_box is not None:
-                    repl = _normalize_text(q65.q_replace_box.text() or "")
-            except Exception:
-                repl = ""
-            if hasattr(q65.q79, "replace_next"):
-                q65.q79.replace_next(needle, repl)
-        except Exception:
-            pass
-
-    def _do_replace_all(q65):
-        try:
-            if not hasattr(q65, "q79"):
-                return
-            if not hasattr(q65, "q_qbox") or q65.q_qbox is None:
-                return
-            needle = _normalize_text(q65.q_qbox.text() or "")
-            if not needle or needle.isspace():
-                return
-            repl = ""
-            try:
-                if hasattr(q65, "q_replace_box") and q65.q_replace_box is not None:
-                    repl = _normalize_text(q65.q_replace_box.text() or "")
-            except Exception:
-                repl = ""
-            if hasattr(q65.q79, "replace_all"):
-                q65.q79.replace_all(needle, repl)
-        except Exception:
-            pass
-
     def q68(q65):
         q65.q72 = QVBoxLayout(q65)
         q65.q72.setContentsMargins(0, 0, 0, 0)
@@ -2242,18 +2154,8 @@ class q64(QWidget):
         q65.q_logo.setFont(f)
         q65.q_logo.setStyleSheet(f"color:{q2}; font-weight:normal; margin-top:1px;")
 
-        # ✅ 新增：q框（71px）
-        q65.q_qbox = QLineEdit()
-        q65.q_qbox.setFixedWidth(71)
-        q65.q_qbox.setAlignment(Qt.AlignCenter)
-        q65.q_qbox.setPlaceholderText("f")
-        q65.q_qbox.setStyleSheet(
-            "QLineEdit{border:1px solid rgba(0,0,0,40); border-radius:6px; padding:2px; background:rgba(255,255,255,80);}"
-            "QLineEdit:focus{border:1px solid rgba(0,0,0,90);}"
-        )
-
         q65.q_font_box = QLineEdit()
-        q65.q_font_box.setFixedWidth(64)  # ✅ 收窄6px：70 -> 64
+        q65.q_font_box.setFixedWidth(70)
         saved_pt = _s_get_str("font_pt", "11").strip() or "11"
         q65.q_font_box.setText(saved_pt)
         q65.q_font_box.setAlignment(Qt.AlignCenter)
@@ -2283,8 +2185,7 @@ class q64(QWidget):
 
         q74.addWidget(q65.q_logo)
         q74.addStretch()
-        q74.addWidget(q65.q_qbox)      # ✅ q框在左
-        q74.addWidget(q65.q_font_box)  # ✅ 字号框在右
+        q74.addWidget(q65.q_font_box)
         q74.addWidget(q65.q75)
         q74.addWidget(q65.q76)
         q74.addWidget(q65.q77)
@@ -2296,57 +2197,13 @@ class q64(QWidget):
         ph.setReadOnly(True)
         ph.setFocusPolicy(Qt.NoFocus)
         ph.setFont(QFont("Consolas", 11))
-        apply_editor_theme(ph, q1)
+        apply_editor_theme(ph, q1)  # 统一一下 placeholder 也不坏
         ph.setPlainText("\n" * _START_EMPTY_LINES)
         q65.q79 = ph
         q65.q72.addWidget(q65.q79)
 
         q65.q80 = q6(q65)
         QTimer.singleShot(0, q65._pos_resize_grip)
-
-        # ✅ 替换条：总宽 71px，紧贴在 q框正下方
-        q65.q_replace_panel = QWidget(q65)
-        q65.q_replace_panel.setVisible(False)
-        q65.q_replace_panel.setFixedWidth(71)
-        try:
-            h = int(q65.q_qbox.sizeHint().height())
-        except Exception:
-            h = 22
-        q65.q_replace_panel.setFixedHeight(h)
-
-        lay = QHBoxLayout(q65.q_replace_panel)
-        lay.setContentsMargins(0, 0, 0, 0)
-        lay.setSpacing(0)
-
-        q65.q_replace_box = QLineEdit()
-        q65.q_replace_box.setFixedHeight(h)
-        q65.q_replace_box.setStyleSheet(
-            "QLineEdit{border:1px solid rgba(0,0,0,40); border-radius:6px; padding:2px; background:rgba(255,255,255,80);}"
-            "QLineEdit:focus{border:1px solid rgba(0,0,0,90);}"
-        )
-
-        # 按你的“总宽=71px”，按钮极窄：用“替/全”
-        q65.q_btn_rep_one = QPushButton("替")
-        q65.q_btn_rep_all = QPushButton("全")
-        q65.q_btn_rep_one.setToolTip("查找替换")
-        q65.q_btn_rep_all.setToolTip("全部替换")
-        for b in (q65.q_btn_rep_one, q65.q_btn_rep_all):
-            b.setFixedHeight(h)
-            b.setFixedWidth(18)
-            b.setStyleSheet(
-                "QPushButton{border:1px solid rgba(0,0,0,40); border-radius:6px; background:rgba(255,255,255,80); font-size:10px; padding:0px;}"
-                "QPushButton:hover{background:rgba(255,255,255,130);}"
-            )
-
-        # 剩余给替换框
-        q65.q_replace_box.setFixedWidth(max(1, 71 - 18 - 18))
-
-        lay.addWidget(q65.q_replace_box)
-        lay.addWidget(q65.q_btn_rep_one)
-        lay.addWidget(q65.q_btn_rep_all)
-
-        q65.q_btn_rep_one.clicked.connect(q65._do_replace_one)
-        q65.q_btn_rep_all.clicked.connect(q65._do_replace_all)
 
     def apply_font_size(q65):
         t = q65.q_font_box.text().strip()
@@ -2379,34 +2236,9 @@ class q64(QWidget):
         q65.q80.setVisible(not on)
         if hasattr(q65, "q79") and hasattr(q65.q79, "set_zen"):
             q65.q79.set_zen(on)
-
-        # ✅ 进入 zen 时隐藏替换条
-        try:
-            if on and hasattr(q65, "q_replace_panel") and q65.q_replace_panel is not None:
-                q65.q_replace_panel.hide()
-        except Exception:
-            pass
-
         QTimer.singleShot(0, q65._pos_resize_grip)
 
     def eventFilter(q65, obj, event):
-        # ✅ q框右键：开关替换条；替换条区域右键不触发 zen
-        if event.type() == QEvent.MouseButtonPress:
-            try:
-                if event.button() == Qt.RightButton:
-                    if hasattr(q65, "q_qbox") and obj == q65.q_qbox:
-                        q65._toggle_replace_panel()
-                        return True
-                    if hasattr(q65, "q_replace_panel") and obj in (
-                        getattr(q65, "q_replace_panel", None),
-                        getattr(q65, "q_replace_box", None),
-                        getattr(q65, "q_btn_rep_one", None),
-                        getattr(q65, "q_btn_rep_all", None),
-                    ):
-                        return True
-            except Exception:
-                pass
-
         if event.type() == QEvent.MouseButtonPress:
             try:
                 if event.button() == Qt.RightButton:
@@ -2598,3 +2430,325 @@ if __name__ == "__main__":
     finally:
         if _keyboard_listener:
             _keyboard_listener.stop()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
