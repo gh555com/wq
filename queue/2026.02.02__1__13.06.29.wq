@@ -122,7 +122,7 @@ _BG_COLOR_MAP = {
 }
 
 _SELECTION_THEMES = {
-    "orange_black": (QColor(148, 48, 0, 180), QColor(255, 255, 255)),   # rgba(48,22,0,180)
+    "orange_black": (QColor(148, 122, 0, 180), QColor(255, 255, 255)),   # rgba(48,22,0,180)
     "dark_gold":    (QColor(132, 98, 16, 180 ),    QColor(255, 255, 255)),   # rgb(132,98,16)
 }
 
