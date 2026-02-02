@@ -103,14 +103,10 @@ q2 = "#5a4630"
 q5 = "rgba(220, 50, 47, 128)"
 q83 = "rgba(0,0,0,20)"
 
-# =========================
-# ✅ 最佳实践：主题统一管理（只改一处）
-# =========================
-
 # 你要换选中底色，只改这里即可：
 # - "orange_black": 橙黑色稍透明
 # - "dark_gold": 深暗金色
-SELECTION_THEME = "dark_gold"   # <- 改这里
+SELECTION_THEME = "orange_black"   # <- 改这里
 
 _BG_COLOR_MAP = {
     'q': q1,
@@ -123,6 +119,9 @@ _BG_COLOR_MAP = {
 
 _SELECTION_THEMES = {
     "orange_black": (QColor(248, 48, 0, 160), QColor(255, 255, 255)),   # rgba(48,22,0,180)
+
+
+    # "orange_black": (QColor(214, 0, 0, 112), QColor(255, 255, 255)),
     "dark_gold":    (QColor(111, 76, 11, 177 ),    QColor(255, 255, 255)),   # rgb(132,98,16)
 }
 
