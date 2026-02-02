@@ -1,3 +1,58 @@
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 import sys
 import os
 import signal
@@ -94,9 +149,9 @@ def _s_set(k: str, v):
 # 背景色：wq1 到 wq6
 q1 = "#ede4cf"   # 默认
 q1_wq2 = "#f0e6d2"
-q1_wq3 = "#E7E4C2"
+q1_wq3 = "#e8d9c1"
 q1_wq4 = "#f2e8d8"
-q1_wq5 = "#DCE1B5"
+q1_wq5 = "#e8d0c0"
 q1_wq6 = "#e8e2c6"
 
 q2 = "#5a4630"
@@ -110,7 +165,7 @@ q83 = "rgba(0,0,0,20)"
 # 你要换选中底色，只改这里即可：
 # - "orange_black": 橙黑色稍透明
 # - "dark_gold": 深暗金色
-SELECTION_THEME = "dark_gold"   # <- 改这里
+SELECTION_THEME = "orange_black"   # <- 改这里
 
 _BG_COLOR_MAP = {
     'q': q1,
@@ -122,8 +177,8 @@ _BG_COLOR_MAP = {
 }
 
 _SELECTION_THEMES = {
-    "orange_black": (QColor(248, 48, 0, 160), QColor(255, 255, 255)),   # rgba(48,22,0,180)
-    "dark_gold":    (QColor(111, 76, 11, 177 ),    QColor(255, 255, 255)),   # rgb(132,98,16)
+    "orange_black": (QColor(148, 122, 0, 180), QColor(255, 255, 255)),   # rgba(48,22,0,180)
+    "dark_gold":    (QColor(132, 98, 16, 180 ),    QColor(255, 255, 255)),   # rgb(132,98,16)
 }
 
 def get_bg_color_by_wq_id(wq_id: str) -> str:
@@ -2228,3 +2283,170 @@ if __name__ == "__main__":
     finally:
         if _keyboard_listener:
             _keyboard_listener.stop()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
