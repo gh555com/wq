@@ -1,3 +1,64 @@
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 import sys
 import os
 import signal
@@ -1316,29 +1377,38 @@ class q19(QPlainTextEdit):
 
     def _scroll_cursor_to_target(q20, from_bottom_line: int = 8):
         try:
-            # 先确保光标可见
-            q20.ensureCursorVisible()
+            vp = q20.viewport().rect()
+            if vp.isNull():
+                return
+            fm = q20.fontMetrics()
+            lh = max(1, int(fm.height()))
+            vis_lines = max(1, int(vp.height() / float(lh)))
 
-            # 获取视口高度和滚动条
-            viewport_height = q20.viewport().height()
+            # 确保 from_bottom_line 在有效范围内
+            target_line_from_bottom = max(0, min(int(from_bottom_line), vis_lines - 1))
+
+            # 计算目标行在视口中的绝对 y 坐标
+            # 从底部数第 target_line_from_bottom 行，第0行是最底端
+            target_y = vp.height() - (target_line_from_bottom + 1) * lh
+
+            # 获取光标所在行的矩形
+            cursor_rect = q20.cursorRect(q20.textCursor())
+            current_line_top = cursor_rect.top()
+
+            # 计算需要滚动的像素数
+            scroll_delta = current_line_top - target_y
+
+            # 应用滚动
             scroll_bar = q20.verticalScrollBar()
-
-            # 计算目标滚动位置：让光标行位于视口中间偏下
-            # 将滚动条值调整为当前值减去视口高度的20%
-            # 这样光标行就会显示在视口中间偏下的位置
-            target_scroll = scroll_bar.value() - int(viewport_height * 0.2)
+            current_value = scroll_bar.value()
+            new_value = current_value + scroll_delta
 
             # 确保滚动值在有效范围内
-            target_scroll = max(scroll_bar.minimum(), min(scroll_bar.maximum(), target_scroll))
-
-            # 设置滚动条值
-            scroll_bar.setValue(target_scroll)
+            new_value = max(scroll_bar.minimum(), min(scroll_bar.maximum(), new_value))
+            scroll_bar.setValue(new_value)
 
             # 再次确保光标可见
             q20.ensureCursorVisible()
-
-            # 强制更新视图
-            q20.viewport().update()
         except Exception:
             pass
 
@@ -1351,10 +1421,8 @@ class q19(QPlainTextEdit):
             doc = q20.document()
             start_pos = q20.textCursor().position()
 
-            # 查找下一个匹配项
             c = doc.find(needle, start_pos)
             if c.isNull():
-                # 如果没有找到，从文档开头查找
                 c = doc.find(needle, 0)
                 if c.isNull():
                     return
@@ -1365,10 +1433,8 @@ class q19(QPlainTextEdit):
             tc.setPosition(endp)
             q20.setTextCursor(tc)
 
-            # 使用 QPlainTextEdit 的 scrollTo 方法，将光标行定位到视口中间
-            # Qt.AlignCenter 确保光标行显示在视口中间
-            # 这是最稳定可靠的方法
-            q20.scrollTo(tc, Qt.AlignCenter)
+            # 调整滚动位置，确保匹配行在版面中间偏下
+            QTimer.singleShot(0, lambda: q20._scroll_cursor_to_target(from_bottom_line))
         except Exception:
             pass
 
@@ -2616,3 +2682,164 @@ if __name__ == "__main__":
     finally:
         if _keyboard_listener:
             _keyboard_listener.stop()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

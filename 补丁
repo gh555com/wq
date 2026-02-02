@@ -1,0 +1,210 @@
+的梦，我按你“基于当前代码改”的 5 条要求，**只动最小范围**给你一份 **unified diff 补丁**（其它逻辑一行不碰），你把它应用到你现在那份 `.py` 文件里即可。
+
+下面这份补丁完成：
+
+* **q框宽度改为 111px**
+* **6 个窗口分配顺序改为 `asqw21`**
+* **每个窗口的 Windows 任务栏/标题栏窗口名 = 左上角显示文本**（例如 `s : 的梦gaea` / `2 : 111,999`）
+* **q框按回车跳下一个匹配时，焦点永远留在 q框**
+* **替换框开关不再用右键**；改为：q框有焦点时 **Tab 或 F2 抬起一次** 开/关替换框
+* **全窗口任何位置右键 = 只切换 zen**，并且 **q框/替换框/字号框绝不弹出右键菜单**
+
+---
+
+## 直接贴到你文件里用的补丁（推荐）
+
+把下面内容保存为 `wq.patch`，然后用 git apply / 或你自己的方式手动套进去也行：
+
+```diff
+*** a/wq_ggea.py
+--- b/wq_ggea.py
+***************
+*** 1,1 ****
+--- 1,1 ----
+***************
+*** 112,118 ****
+- _WINDOW_GROUPS = ['a', 's', 'q', 'w', '1', '2']
++ _WINDOW_GROUPS = ['a', 's', 'q', 'w', '2', '1']
+***************
+*** 610,641 ****
+ class q19(QPlainTextEdit):
+@@
+     def jump_to_next_qbox_match(q20, from_bottom_line: int = 8):
+         needle = q20._qbox_text()
+         if not needle:
+             return
+@@
+             endp = c.selectionEnd()
+             tc = q20.textCursor()
+             tc.setPosition(endp)
+             q20.setTextCursor(tc)
+-            q20.setFocus(Qt.OtherFocusReason)
+             q20.ensureCursorVisible()
+
+             QTimer.singleShot(0, lambda: q20._scroll_cursor_to_target(from_bottom_line))
+         except Exception:
+             pass
+***************
+*** 933,942 ****
+ class q64(QWidget):
+@@
+     def _sync_logo(q65):
+         if not hasattr(q65, "q_logo"):
+             return
+         left = q65._wq_id if q65._wq_id else "?"
+         suffix = q65._logo_docsize_txt if q65._logo_show_docsize else "的梦gaea"
+-        q65.q_logo.setText(f"{left} : {suffix}")
++        title = f"{left} : {suffix}"
++        q65.q_logo.setText(title)
++        try:
++            q65.setWindowTitle(title)
++        except Exception:
++            pass
+***************
+*** 1162,1208 ****
+     def q68(q65):
+@@
+         # ✅ 新增：q框（71px）
+         q65.q_qbox = QLineEdit()
+-        q65.q_qbox.setFixedWidth(71)
++        q65.q_qbox.setFixedWidth(111)
+         q65.q_qbox.setAlignment(Qt.AlignCenter)
+         q65.q_qbox.setPlaceholderText("f")
++        q65.q_qbox.setContextMenuPolicy(Qt.NoContextMenu)
+         q65.q_qbox.setStyleSheet(
+             "QLineEdit{border:1px solid rgba(0,0,0,40); border-radius:6px; padding:2px; background:rgba(255,255,255,80);}"
+             "QLineEdit:focus{border:1px solid rgba(0,0,0,90);}"
+         )
+@@
+         q65.q_font_box = QLineEdit()
+         q65.q_font_box.setFixedWidth(64)  # ✅ 收窄6px：70 -> 64
+         saved_pt = _s_get_str("font_pt", "11").strip() or "11"
+         q65.q_font_box.setText(saved_pt)
+         q65.q_font_box.setAlignment(Qt.AlignCenter)
+         q65.q_font_box.setValidator(QIntValidator(1, 200, q65.q_font_box))
++        q65.q_font_box.setContextMenuPolicy(Qt.NoContextMenu)
+         q65.q_font_box.setStyleSheet(
+             "QLineEdit{border:1px solid rgba(0,0,0,40); border-radius:6px; padding:2px; background:rgba(255,255,255,80);}"
+             "QLineEdit:focus{border:1px solid rgba(0,0,0,90);}"
+         )
+         q65.q_font_box.editingFinished.connect(q65.apply_font_size)
+@@
+         # ✅ 替换条：总宽 71px，紧贴在 q框正下方
+         q65.q_replace_panel = QWidget(q65)
+         q65.q_replace_panel.setVisible(False)
+-        q65.q_replace_panel.setFixedWidth(71)
++        q65.q_replace_panel.setFixedWidth(111)
+         try:
+             h = int(q65.q_qbox.sizeHint().height())
+         except Exception:
+             h = 22
+         q65.q_replace_panel.setFixedHeight(h)
+@@
+         q65.q_replace_box = QLineEdit()
+         q65.q_replace_box.setFixedHeight(h)
++        q65.q_replace_box.setContextMenuPolicy(Qt.NoContextMenu)
+         q65.q_replace_box.setStyleSheet(
+             "QLineEdit{border:1px solid rgba(0,0,0,40); border-radius:6px; padding:2px; background:rgba(255,255,255,80);}"
+             "QLineEdit:focus{border:1px solid rgba(0,0,0,90);}"
+         )
+@@
+-        q65.q_replace_box.setFixedWidth(max(1, 71 - 18 - 18))
++        q65.q_replace_box.setFixedWidth(max(1, 111 - 18 - 18))
+
+         lay.addWidget(q65.q_replace_box)
+         lay.addWidget(q65.q_btn_rep_one)
+         lay.addWidget(q65.q_btn_rep_all)
+***************
+*** 1296,1356 ****
+     def eventFilter(q65, obj, event):
+-        # ✅ q框右键：开关替换条；替换条区域右键不触发 zen
+-        if event.type() == QEvent.MouseButtonPress:
+-            try:
+-                if event.button() == Qt.RightButton:
+-                    if hasattr(q65, "q_qbox") and obj == q65.q_qbox:
+-                        q65._toggle_replace_panel()
+-                        return True
+-                    if hasattr(q65, "q_replace_panel") and obj in (
+-                        getattr(q65, "q_replace_panel", None),
+-                        getattr(q65, "q_replace_box", None),
+-                        getattr(q65, "q_btn_rep_one", None),
+-                        getattr(q65, "q_btn_rep_all", None),
+-                    ):
+-                        return True
+-            except Exception:
+-                pass
+-
+-        if event.type() == QEvent.MouseButtonPress:
+-            try:
+-                if event.button() == Qt.RightButton:
+-                    q65.toggle_zen()
+-                    return True
+-            except Exception:
+-                pass
++        # ✅ 规则：右键任何位置 = 只切换 zen（禁用所有右键菜单/右键逻辑）
++        if event.type() == QEvent.MouseButtonPress:
++            try:
++                if event.button() == Qt.RightButton:
++                    q65.toggle_zen()
++                    return True
++            except Exception:
++                pass
++
++        # ✅ 规则：q框获得焦点时，Tab/F2 抬起一次 = 开关替换条（并吃掉 Tab，避免焦点跳走）
++        if hasattr(q65, "q_qbox") and obj == q65.q_qbox:
++            if event.type() == QEvent.KeyPress:
++                try:
++                    if event.key() in (Qt.Key_Tab, Qt.Key_F2):
++                        event.accept()
++                        return True
++                except Exception:
++                    pass
++            if event.type() == QEvent.KeyRelease:
++                try:
++                    if event.key() in (Qt.Key_Tab, Qt.Key_F2):
++                        q65._toggle_replace_panel()
++                        event.accept()
++                        return True
++                except Exception:
++                    pass
+
+         if (not q65._zen) and (obj in (q65.q73, q65.q_logo)):
+             if event.type() == QEvent.MouseButtonPress:
+                 try:
+                     if event.button() == Qt.LeftButton:
+                         q65._update_logo_docsize()
+                         if not q65.isMaximized():
+                             q65._drag_title = True
+                             q65._drag_off = event.globalPos() - q65.pos()
+                         return True
+                 except Exception:
+                     pass
+```
+
+---
+
+## 你改完后怎么验证（不用猜）
+
+1. 连开多个窗口（最多 6 个）：
+
+* Windows 任务栏会显示：`a : 的梦gaea`、`s : 的梦gaea` …（或 `2 : 111,999` 这种文档尺寸标题）
+
+2. q框：
+
+* 宽度变成 **111px**
+* 输入内容后高亮正常
+* **一直按回车**：跳到下一个匹配，但**焦点仍在 q框**（可以连按回车不断跳）
+
+3. 替换框：
+
+* q框有焦点时，**Tab 抬起一次** 或 **F2 抬起一次**：替换框开/关
+* 隐藏再打开：替换框内容保留不丢
+
+4. 右键：
+
+* **任何地方右键 = 只切 zen**
+* q框/替换框/字号框：**绝不会弹出系统那个 Undo/Redo/Copy/Paste 菜单**
+
+---
+
+如果你希望我把这份补丁“再收紧到完全可复制的几段原地替换代码”（不用 diff），我也能直接按你文件里现有片段给你逐段替换版。
