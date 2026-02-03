@@ -1365,10 +1365,70 @@ class q19(QPlainTextEdit):
             tc.setPosition(endp)
             q20.setTextCursor(tc)
 
-            # 使用 QPlainTextEdit 的 scrollTo 方法，将光标行定位到视口中间
-            # Qt.AlignCenter 确保光标行显示在视口中间
-            # 这是最稳定可靠的方法
-            q20.scrollTo(tc, Qt.AlignCenter)
+            # 先确保光标可见
+            q20.ensureCursorVisible()
+
+            # 等待一小段时间，确保所有跳转操作完成
+            import time
+            time.sleep(0.05)
+
+            # 使用更直接的滚动条操作方式，根据字号和窗口高度动态调整滚动距离
+            # 获取滚动条
+            scroll_bar = q20.verticalScrollBar()
+            if scroll_bar:
+                # 获取当前字号大小
+                font_size = q20.font().pointSize()
+
+                # 获取窗口高度
+                window_height = q20.viewport().height()
+
+                # 基础滚动距离
+                base_scroll_distance = 11
+
+                # 计算实际滚动距离
+                scroll_distance = base_scroll_distance
+
+                # 根据字号大小调整滚动距离（字号越大，滚动越少）
+                if font_size > 61:
+                    # 字号大于61px时，不滚动
+                    scroll_distance = 0
+                elif font_size > 0:
+                    # 字号在0-61px之间，做减少曲线
+                    # 滚动距离 = 基础距离 * (1 - (font_size / 61))
+                    scroll_factor = 1.0 - (font_size / 61.0)
+                    scroll_distance = int(base_scroll_distance * scroll_factor)
+
+                # 根据窗口高度调整滚动距离
+                if window_height < 222:
+                    # 窗口高度小于222px时，不滚动
+                    scroll_distance = 0
+                elif window_height > 220:
+                    # 窗口高度大于220px时，做增加曲线
+                    # 滚动距离 = 基础距离 * (window_height / 220)，但不超过基础距离
+                    height_factor = min(1.0, window_height / 220.0)
+                    scroll_distance = int(scroll_distance * height_factor)
+
+                # 确保滚动距离不为负数
+                scroll_distance = max(0, scroll_distance)
+
+                # 获取当前滚动条值
+                current_value = scroll_bar.value()
+
+                # 计算目标滚动值
+                target_value = current_value + scroll_distance
+
+                # 确保滚动值在有效范围内
+                target_value = max(scroll_bar.minimum(), min(scroll_bar.maximum(), target_value))
+
+                # 直接设置滚动条值，实现向下滚动
+                scroll_bar.setValue(target_value)
+
+                # 强制更新视图
+                q20.viewport().update()
+                q20.repaint()
+
+                # 再次强制更新，确保滚动效果生效
+                QApplication.processEvents()
         except Exception:
             pass
 

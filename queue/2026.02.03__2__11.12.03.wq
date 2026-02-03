@@ -100,21 +100,6 @@
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 import sys
 import os
 import signal
@@ -1439,32 +1424,19 @@ class q19(QPlainTextEdit):
             fm = q20.fontMetrics()
             lh = max(1, int(fm.height()))
             vis_lines = max(1, int(vp.height() / float(lh)))
+            k = max(0, min(int(from_bottom_line), vis_lines - 1))
 
-            # 确保 from_bottom_line 在有效范围内
-            target_line_from_bottom = max(0, min(int(from_bottom_line), vis_lines - 1))
+            # 目标：从底部数第 k 行附近
+            desired_y = int(vp.height() - (k + 0.6) * lh)
 
-            # 计算目标行在视口中的绝对 y 坐标
-            # 从底部数第 target_line_from_bottom 行，第0行是最底端
-            target_y = vp.height() - (target_line_from_bottom + 1) * lh
+            r = q20.cursorRect(q20.textCursor())
+            delta = int(r.top() - desired_y)
 
-            # 获取光标所在行的矩形
-            cursor_rect = q20.cursorRect(q20.textCursor())
-            current_line_top = cursor_rect.top()
-
-            # 计算需要滚动的像素数
-            scroll_delta = current_line_top - target_y
-
-            # 应用滚动
-            scroll_bar = q20.verticalScrollBar()
-            current_value = scroll_bar.value()
-            new_value = current_value + scroll_delta
-
-            # 确保滚动值在有效范围内
-            new_value = max(scroll_bar.minimum(), min(scroll_bar.maximum(), new_value))
-            scroll_bar.setValue(new_value)
-
-            # 再次确保光标可见
-            q20.ensureCursorVisible()
+            sb = q20.verticalScrollBar()
+            v = int(sb.value())
+            nv = v + delta
+            nv = max(int(sb.minimum()), min(int(sb.maximum()), nv))
+            sb.setValue(nv)
         except Exception:
             pass
 
@@ -1483,13 +1455,12 @@ class q19(QPlainTextEdit):
                 if c.isNull():
                     return
 
-            # 确保光标跳转到匹配块的最末尾字符
             endp = c.selectionEnd()
             tc = q20.textCursor()
             tc.setPosition(endp)
             q20.setTextCursor(tc)
+            q20.ensureCursorVisible()
 
-            # 调整滚动位置，确保匹配行在版面中间偏下
             QTimer.singleShot(0, lambda: q20._scroll_cursor_to_target(from_bottom_line))
         except Exception:
             pass
@@ -2738,6 +2709,21 @@ if __name__ == "__main__":
     finally:
         if _keyboard_listener:
             _keyboard_listener.stop()
+
+w
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
