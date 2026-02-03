@@ -1370,16 +1370,23 @@ class q19(QPlainTextEdit):
 
             # 等待一小段时间，确保所有跳转操作完成
             import time
-            time.sleep(0.05)
+            time.sleep(0.02)
+
+            # 强制刷新视图，确保获取到最新的字号和窗口尺寸
+            q20.viewport().update()
+            q20.repaint()
+            QApplication.processEvents()
 
             # 使用更直接的滚动条操作方式，根据字号和窗口高度动态调整滚动距离
             # 获取滚动条
             scroll_bar = q20.verticalScrollBar()
             if scroll_bar:
-                # 获取当前字号大小
-                font_size = q20.font().pointSize()
+                # 获取当前字号大小（确保获取最新值）
+                font = q20.font()
+                font_size = font.pointSize()
 
-                # 获取窗口高度
+                # 获取窗口高度（确保获取最新值）
+                q20.viewport().updateGeometry()
                 window_height = q20.viewport().height()
 
                 # 基础滚动距离
